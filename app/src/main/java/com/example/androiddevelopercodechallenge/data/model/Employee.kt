@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Employee(
-    val info: Info,
-    val results: List<Result>
+    val info: Info = Info(),
+    val results: List<Result> = emptyList()
 )
