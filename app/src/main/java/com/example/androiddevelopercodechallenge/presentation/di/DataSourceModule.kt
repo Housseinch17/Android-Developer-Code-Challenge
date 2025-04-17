@@ -5,7 +5,6 @@ import com.example.androiddevelopercodechallenge.data.dataSource.EmployeeDataSou
 import com.example.androiddevelopercodechallenge.data.dataSource.EmployeeDataSourceImpl
 import com.example.androiddevelopercodechallenge.data.dataSource.EmployeeRepositoryImpl
 import com.example.androiddevelopercodechallenge.domain.repository.EmployeeRepository
-import com.example.androiddevelopercodechallenge.domain.useCase.EmployeeUseCaseImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,7 +15,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DataSource {
+object DataSourceModule {
 
     //scoped to application lifecycle
     //single instance created across application
@@ -25,7 +24,7 @@ object DataSource {
     fun provideEmployeeDataSource(
         apiService: ApiService,
         @Named("Dispatchers_IO") coroutineDispatcher: CoroutineDispatcher
-    ): EmployeeDataSourceImpl {
+    ): EmployeeDataSource {
         return EmployeeDataSourceImpl(
             apiService = apiService,
             coroutineDispatcher = coroutineDispatcher
@@ -36,17 +35,9 @@ object DataSource {
     @Provides
     fun provideEmployeeRepository(
         employeeDataSource: EmployeeDataSource
-    ): EmployeeRepository{
+    ): EmployeeRepository {
         return EmployeeRepositoryImpl(
             employeeDataSource = employeeDataSource
-        )
-    }
-
-    @Singleton
-    @Provides
-    fun provideEmployeeUseCase(employeeRepository: EmployeeRepository): EmployeeUseCaseImpl{
-        return EmployeeUseCaseImpl(
-            employeeRepository = employeeRepository
         )
     }
 }

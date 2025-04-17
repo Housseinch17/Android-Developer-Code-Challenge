@@ -5,7 +5,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface ApiService {
-    @GET
+    @GET("api/")
     suspend fun getEmployees(
         @Query("page") page: Int,
         @Query("results") results: Int = 20,

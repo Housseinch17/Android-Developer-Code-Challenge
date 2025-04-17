@@ -1,5 +1,8 @@
 package com.example.androiddevelopercodechallenge.data.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Login(
     val md5: String,
     val password: String,

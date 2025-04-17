@@ -15,13 +15,19 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://randomuser.me/api"
+    private const val BASE_URL = "https://randomuser.me/"
+
+    val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
+
 
     @Singleton
     @Provides
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .baseUrl(BASE_URL)
             .build()
     }
