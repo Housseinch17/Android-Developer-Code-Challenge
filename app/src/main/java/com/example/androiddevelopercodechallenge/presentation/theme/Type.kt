@@ -1,4 +1,4 @@
-package com.example.androiddevelopercodechallenge.ui.theme
+package com.example.androiddevelopercodechallenge.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
@@ -14,6 +14,26 @@ val Typography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = Roboto_Bold,
+        fontSize = 20.sp,
+        lineHeight = 26.sp,
+    ),
+    titleMedium = TextStyle(
+        fontFamily = Roboto_Semi_bold,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = Roboto_Regular,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+    ),
+    labelSmall = TextStyle(
+        fontFamily = Roboto_Regular,
+        fontSize = 12.sp,
+        lineHeight = 18.sp,
     )
     /* Other default text styles to override
     titleLarge = TextStyle(
