@@ -19,21 +19,25 @@ val Typography = Typography(
         fontFamily = Roboto_Bold,
         fontSize = 20.sp,
         lineHeight = 26.sp,
+        color = Title
     ),
     titleMedium = TextStyle(
         fontFamily = Roboto_Semi_bold,
         fontSize = 16.sp,
         lineHeight = 24.sp,
+        color = Title,
     ),
     bodyMedium = TextStyle(
         fontFamily = Roboto_Regular,
         fontSize = 14.sp,
         lineHeight = 20.sp,
+        color = Body
     ),
     labelSmall = TextStyle(
         fontFamily = Roboto_Regular,
         fontSize = 12.sp,
         lineHeight = 18.sp,
+        color = Label
     )
     /* Other default text styles to override
     titleLarge = TextStyle(

@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Android Developer – Code Challenge</string>
+    <string name="add_employee">Add Employee</string>
+    <string name="search_employee">Search for Employee</string>
+    <string name="search">Search</string>
+    <string name="clear">Clear</string>
+    <string name="street">Street</string>
+    <string name="id">ID</string>
+    <string name="delete">Delete</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="delete_employee">Delete Employee</string>
+    <string name="are_you_sure_want_to_delete">Are you sure you want to delete</string>
 </resources>

@@ -12,12 +12,10 @@ import com.example.androiddevelopercodechallenge.presentation.navigation.Navigat
 fun MainScreen(
     navHostController: NavHostController
 ) {
-
     Scaffold { innerPadding->
         Navigation(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
             navHostController = navHostController
         )
     }
-
 }

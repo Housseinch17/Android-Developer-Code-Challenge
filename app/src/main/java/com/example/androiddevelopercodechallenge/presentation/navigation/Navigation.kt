@@ -8,7 +8,7 @@ import com.example.androiddevelopercodechallenge.presentation.navigation.navGrap
 
 @Composable
 fun Navigation(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     navHostController: NavHostController
 ) {
     NavHost(
