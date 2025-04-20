@@ -1,6 +1,5 @@
 package com.example.androiddevelopercodechallenge.presentation.navigation
 
-import com.example.androiddevelopercodechallenge.data.model.Employee
 import com.example.androiddevelopercodechallenge.data.model.Result
 import kotlinx.serialization.Serializable
 
@@ -12,6 +11,7 @@ sealed interface Screen {
     data object EmployeeNavGraph: Screen
 
     //composable screens
+
     @Serializable
     data object EmployeeHomeScreen: Screen
 

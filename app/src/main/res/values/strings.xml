@@ -5,9 +5,30 @@
     <string name="search">Search</string>
     <string name="clear">Clear</string>
     <string name="street">Street</string>
+    <string name="country">Country</string>
     <string name="id">ID</string>
     <string name="delete">Delete</string>
     <string name="dismiss">Dismiss</string>
     <string name="delete_employee">Delete Employee</string>
     <string name="are_you_sure_want_to_delete">Are you sure you want to delete</string>
+    <string name="upload_profile">Upload Profile</string>
+    <string name="upload_new_profile">Upload New Profile</string>
+    <string name="no_internet_connection">No internet connection</string>
+    <string name="refresh">Refresh</string>
+    <string name="retry">Retry</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="gender">Gender</string>
+    <string name="email">Email</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="address">Address</string>
+    <string name="typing">Typing</string>
+    <string name="personal_information">Personal information</string>
+    <string name="let_us_know...basic_info">Let us get to know you a bit better by sharing your basic info.</string>
+    <string name="required_fields">Required fields</string>
+    <string name="are_empty">are empty</string>
+    <string name="please_use_valid_email">Please use valid email</string>
+    <string name="has_been_deleted">has been deleted</string>
+    <string name="successfully_added">Successfully added</string>
+
 </resources>

@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -56,9 +57,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.androiddevelopercodechallenge.R
@@ -67,11 +72,13 @@ import com.example.androiddevelopercodechallenge.presentation.theme.AvatarCircle
 import com.example.androiddevelopercodechallenge.presentation.theme.Body
 import com.example.androiddevelopercodechallenge.presentation.theme.CardBackground
 import com.example.androiddevelopercodechallenge.presentation.theme.Label
+import com.example.androiddevelopercodechallenge.presentation.theme.Roboto_Semi_bold
 import com.example.androiddevelopercodechallenge.presentation.theme.SearchBarBG
 import com.example.androiddevelopercodechallenge.presentation.theme.SearchIcon
 import com.example.androiddevelopercodechallenge.presentation.theme.SearchPlaceholder
 import com.example.androiddevelopercodechallenge.presentation.theme.Tryes
 import com.example.androiddevelopercodechallenge.presentation.theme.Typography
+import com.example.androiddevelopercodechallenge.presentation.util.PagingError
 import com.example.androiddevelopercodechallenge.presentation.util.ProfilePicture
 import com.example.androiddevelopercodechallenge.presentation.util.ShimmerEffect
 import com.example.androiddevelopercodechallenge.presentation.util.ShowDialog
@@ -86,13 +93,16 @@ fun EmployeeHomeScreen(
     state: EmployeeHomeUiState,
     onActions: (EmployeeHomeActions) -> Unit,
 ) {
-    Log.d("MyTag","searchQuery: ${state.searchQuery}")
     Scaffold(
         floatingActionButton = {
-            FloatingButtonComposable(
-                isLoading = state.isLoading,
-                onClick = { onActions(EmployeeHomeActions.NavigateToAddEmployee) }
-            )
+            if (state.isLoading) {
+                ShimmerFloatingButton()
+            } else {
+                FloatingButtonComposable(
+                    enableButton = state.enableButtons,
+                    onClick = { onActions(EmployeeHomeActions.NavigateToAddEmployee) }
+                )
+            }
         }
     ) { _ ->
         Column(
@@ -117,9 +127,20 @@ fun EmployeeHomeScreen(
                         } else {
                             Text(
                                 modifier = Modifier,
-                                text = "${
-                                    stringResource(R.string.are_you_sure_want_to_delete)
-                                }: ${state.currentEmployee.name.first} ${state.currentEmployee.name.last}?"
+                                text = buildAnnotatedString {
+                                    append(stringResource(R.string.are_you_sure_want_to_delete))
+                                    append(": ")
+                                    withStyle(
+                                        style = SpanStyle(
+                                            fontFamily = Roboto_Semi_bold,
+                                            fontSize = 16.sp,
+                                            color = Color.Red,
+                                        )
+                                    ) {
+                                        append("${state.currentEmployee.name.first} ${state.currentEmployee.name.last}")
+                                    }
+                                    append("?")
+                                }
                             )
                         }
                     },
@@ -132,12 +153,11 @@ fun EmployeeHomeScreen(
                     }
                 )
             }
+
             val employeeItems = state.employeePagingData.collectAsLazyPagingItems()
 
             Log.d("MyTag", "employeeItems: ${employeeItems.itemCount}")
-
             Log.d("MyTag", "employeeListSize: ${state.employeeList.size}")
-
             Log.d("MyTag", "filteredEmployeeListSize: ${state.filteredEmployeeList.size}")
 
 
@@ -149,15 +169,22 @@ fun EmployeeHomeScreen(
                     }
             }
 
-
             if (state.isLoading) {
                 ShimmerSearchView()
+                Spacer(modifier = Modifier.height(20.dp))
+                repeat(8) {
+                    Column(modifier = Modifier) {
+                        ShimmerEmployeeCard()
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                }
             } else {
                 SearchView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 12.dp),
                     searchQuery = state.searchQuery,
+                    enableButton = state.enableButtons,
                     onClear = { onActions(EmployeeHomeActions.ClearQuery) },
                     onQueryChange = { newQuery ->
                         onActions(EmployeeHomeActions.OnSearchQueryChanged(newQuery = newQuery))
@@ -189,29 +216,66 @@ fun EmployeeHomeScreen(
                             )
                         }
 
-                        when (employeeItems.loadState.append) {
-                            is LoadState.Error -> Unit
+                        //append state of paging(loading, error, notLoading)
+                        val appendState = employeeItems.loadState.append
+
+                        when (appendState) {
+                            is LoadState.Error -> {
+                                Log.d("MyTag", "appendState Error: ${appendState.error}")
+                                //disable searchView and floatingButton
+                                onActions(EmployeeHomeActions.EnableButtons(enableButtons = false))
+
+                                //show error
+                                //employeeItems.retry() will retry to fetch last page
+                                item {
+                                    PagingError(
+                                        id = R.string.retry,
+                                        onPagingPerform = { employeeItems.retry() }
+                                    )
+                                }
+                            }
+
                             LoadState.Loading -> {
+                                Log.d("MyTag", "appendState: Loading")
+                                //enable button: if error happens handled to disable
+                                onActions(EmployeeHomeActions.EnableButtons(enableButtons = true))
+
                                 item {
                                     LoadingItems()
                                 }
                             }
 
-                            is LoadState.NotLoading -> Unit
+                            is LoadState.NotLoading -> onActions(
+                                EmployeeHomeActions.UpdateLoader(
+                                    isLoading = false
+                                )
+                            )
                         }
 
-                        //when we first show it
-                        when (employeeItems.loadState.refresh) {
-                            is LoadState.Error -> Unit
-                            LoadState.Loading -> {
+                        //refresh state of paging(loading, error, notLoading)
+                        val refreshState = employeeItems.loadState.refresh
+
+                        when (refreshState) {
+                            is LoadState.Error -> {
+                                Log.d("MyTag", "refreshState Error: ${refreshState.error}")
+                                //disable searchView and floatingButton
+                                onActions(EmployeeHomeActions.EnableButtons(enableButtons = false))
+
+                                //show error
+                                // employeeItems.refresh() new paging with new instance
                                 item {
-                                    repeat(8) {
-                                        Column(modifier = Modifier) {
-                                            ShimmerEmployeeCard()
-                                            Spacer(modifier = Modifier.height(20.dp))
-                                        }
-                                    }
+                                    PagingError(
+                                        id = R.string.refresh,
+                                        onPagingPerform = { employeeItems.refresh() },
+                                    )
                                 }
+                            }
+
+                            LoadState.Loading -> {
+                                //update loader
+                                onActions(EmployeeHomeActions.UpdateLoader(isLoading = true))
+                                //enable button: if error happens handled to disable
+                                onActions(EmployeeHomeActions.EnableButtons(enableButtons = true))
                             }
 
                             is LoadState.NotLoading -> onActions(
@@ -224,18 +288,20 @@ fun EmployeeHomeScreen(
                 }
             } else {
                 //to remove scrolling effect in lazyColumn
-                CompositionLocalProvider(LocalOverscrollConfiguration provides null){
+                CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(20.dp),
                         contentPadding = PaddingValues(vertical = 20.dp)
                     ) {
-                        items(count = state.filteredEmployeeList.size) { index ->
-                            val item = state.filteredEmployeeList[index]
-
+                        //id can be null
+                        //key for better performance
+                        items(items = state.filteredEmployeeList, key = { result ->
+                            result.id.value ?: result.email
+                        }) { employee ->
                             EmployeeCard(
                                 modifier = Modifier.fillMaxWidth(),
-                                employee = item,
+                                employee = employee,
                                 onClick = { employee ->
                                     onActions(EmployeeHomeActions.NavigateToEmployeeDetail(employee = employee))
                                 },
@@ -314,7 +380,6 @@ fun ShimmerEmployeeCard() {
         )
     }
 }
-
 
 
 @Composable
@@ -416,6 +481,7 @@ fun ShimmerSearchView() {
 fun SearchView(
     modifier: Modifier,
     searchQuery: String,
+    enableButton: Boolean,
     onClear: () -> Unit,
     onQueryChange: (String) -> Unit
 ) {
@@ -447,6 +513,7 @@ fun SearchView(
         trailingIcon = {
             IconButton(
                 onClick = onClear,
+                enabled = enableButton,
                 colors = IconButtonDefaults.iconButtonColors(contentColor = SearchIcon)
             ) {
                 Icon(
@@ -459,6 +526,7 @@ fun SearchView(
         textStyle = Typography.bodyMedium,
         maxLines = 1,
         value = searchQuery,
+        enabled = enableButton,
         onValueChange = onQueryChange,
         shape = RoundedCornerShape(25.dp),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -474,13 +542,15 @@ fun SearchView(
             focusedTextColor = Body,
             unfocusedTextColor = SearchPlaceholder,
             unfocusedPlaceholderColor = SearchPlaceholder,
+            disabledPlaceholderColor = SearchPlaceholder.copy(alpha = 0.3f),
             focusedLeadingIconColor = SearchIcon,
             unfocusedLeadingIconColor = SearchIcon,
-            disabledTrailingIconColor = SearchIcon,
+            disabledLeadingIconColor = SearchIcon.copy(alpha = 0.3f),
             focusedTrailingIconColor = SearchIcon,
-
-
-            ),
+            unfocusedTrailingIconColor = SearchIcon,
+            disabledTrailingIconColor = SearchIcon.copy(alpha = 0.3f),
+            disabledIndicatorColor = Color.Transparent,
+        ),
         placeholder = {
             Text(text = stringResource(R.string.search), color = LocalContentColor.current)
         },
@@ -488,29 +558,31 @@ fun SearchView(
 }
 
 @Composable
+fun ShimmerFloatingButton() {
+    ShimmerEffect(modifier = Modifier
+        .size(56.dp)
+        .clip(CircleShape))
+}
+
+@Composable
 fun FloatingButtonComposable(
-    isLoading: Boolean,
+    enableButton: Boolean,
     onClick: () -> Unit
 ) {
     FloatingActionButton(
-        onClick = onClick,
+        onClick = {
+            if (enableButton)
+                onClick()
+        },
         shape = CircleShape,
-        containerColor = if (isLoading) Label else Tryes,
-        contentColor = if (isLoading) Color.White else Color.White
+        containerColor = if (enableButton) Tryes else Label,
+        contentColor = Color.White,
     ) {
-        if (isLoading) {
-            ShimmerEffect(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-            )
-        } else {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = stringResource(R.string.add_employee),
-                tint = LocalContentColor.current
-            )
-        }
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = stringResource(R.string.add_employee),
+            tint = LocalContentColor.current
+        )
     }
 }
 

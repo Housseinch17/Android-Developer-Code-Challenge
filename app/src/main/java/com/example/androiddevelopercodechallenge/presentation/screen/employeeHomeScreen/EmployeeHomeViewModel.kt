@@ -37,7 +37,8 @@ sealed interface EmployeeHomeActions {
     data class UpdateEmployeeList(val newEmployeeList: List<Result>) : EmployeeHomeActions
     data class DeleteEmployee(val employee: Result) : EmployeeHomeActions
     data object DeleteEmployeeConfirmed : EmployeeHomeActions
-    data object HideDialog: EmployeeHomeActions
+    data object HideDialog : EmployeeHomeActions
+    data class EnableButtons(val enableButtons: Boolean) : EmployeeHomeActions
 }
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
@@ -58,8 +59,45 @@ class EmployeeHomeViewModel @Inject constructor(
         getEmployee()
     }
 
+    fun onActions(employeeHomeActions: EmployeeHomeActions) {
+        viewModelScope.launch {
+            when (employeeHomeActions) {
+                EmployeeHomeActions.NavigateToAddEmployee -> navigateToAddEmployee()
+                is EmployeeHomeActions.OnSearchQueryChanged -> onSearchQueryChanged(query = employeeHomeActions.newQuery)
+                EmployeeHomeActions.ClearQuery -> clearQuery()
+                is EmployeeHomeActions.NavigateToEmployeeDetail -> navigateToEmployeeDetail(employee = employeeHomeActions.employee)
+                is EmployeeHomeActions.UpdateLoader -> updateLoader(isLoading = employeeHomeActions.isLoading)
+                is EmployeeHomeActions.UpdateEmployeeList -> updateEmployeeList(newEmployeeList = employeeHomeActions.newEmployeeList)
+                is EmployeeHomeActions.DeleteEmployee -> deleteEmployee(employee = employeeHomeActions.employee)
+                EmployeeHomeActions.DeleteEmployeeConfirmed -> deleteEmployeeConfirmed()
+                EmployeeHomeActions.HideDialog -> hideDialog()
+                is EmployeeHomeActions.EnableButtons -> enableButtons(enableButtons = employeeHomeActions.enableButtons)
+            }
+        }
+    }
+
+    fun getEmployee() {
+        val employeePager = Pager(
+            //here pageSize how many items i have in each page
+            //prefetchDistance when to load new items for example here 3 so im saying
+            //when we reach the last 3 items load new page
+            //initialLoadSize how many items i want  to load initial it's usually preferred to use same as pageSize
+            PagingConfig(pageSize = 20, prefetchDistance = 3, initialLoadSize = 20)
+        ) {
+            EmployeePaging(
+                employeeUseCase = employeeUseCase,
+            )
+        }.flow.cachedIn(viewModelScope)
+
+        viewModelScope.launch {
+            _employeeHomeUiState.update { newState ->
+                newState.copy(employeePagingData = employeePager)
+            }
+        }
+    }
+
     private fun updateEmployeeList(newEmployeeList: List<Result>) {
-        Log.d("MyTag", "entered")
+        Log.d("MyTag", "EmployeeHomeViewModel: updateEmployeeList()")
         _employeeHomeUiState.update { newState ->
             newState.copy(
                 employeeList = newEmployeeList,
@@ -68,6 +106,12 @@ class EmployeeHomeViewModel @Inject constructor(
         }
         //filterEmployeeList again when the composable recompose after onStart/onResume (navigating back to EmployeeHomeScreen)
         filterEmployeeList(query = _employeeHomeUiState.value.searchQuery)
+    }
+
+    private fun enableButtons(enableButtons: Boolean) {
+        _employeeHomeUiState.update { newState ->
+            newState.copy(enableButtons = enableButtons)
+        }
     }
 
     private fun filterEmployeeList(query: String) {
@@ -84,74 +128,12 @@ class EmployeeHomeViewModel @Inject constructor(
         }
     }
 
-    fun getEmployee() {
-        val employeePager = Pager(
-            //here pageSize how many items i have in each page
-            //prefetchDistance when to load new items for example here 5 so im saying
-            //when we reach the last 5 items load new page
-            //initialLoadSize how many items i want  to load initial
-            PagingConfig(pageSize = 20, prefetchDistance = 5, initialLoadSize = 20)
-        ) {
-            EmployeePaging(
-                employeeUseCase = employeeUseCase,
-            )
-        }.flow.cachedIn(viewModelScope)
-
-        viewModelScope.launch {
-            _employeeHomeUiState.update { newState ->
-                newState.copy(employeePagingData = employeePager)
-            }
-        }
-
-    }
-
-
-//    private val searchQueryPaging = MutableStateFlow("")
-
-//    //used for paging with query
-//    private fun getEmployee(){
-//        val employeeFlow = searchQueryPaging
-//            .debounce(300)
-//            .distinctUntilChanged()
-//            .flatMapLatest { query ->
-//                Pager(
-//                    config = PagingConfig(pageSize = 20, prefetchDistance = 5, initialLoadSize = 20),
-//                    pagingSourceFactory = {
-//                        EmployeePaging(employeeUseCase, query)
-//                    }
-//                ).flow
-//            }
-//            .cachedIn(viewModelScope)
-//
-//        _employeeHomeUiState.update { newState->
-//            newState.copy(employeePagingData = employeeFlow)
-//        }
-//    }
-
 
     fun onSearchQueryChanged(query: String) {
-//        searchQueryPaging.value = query
         _employeeHomeUiState.update { newState ->
             newState.copy(searchQuery = query)
         }
         filterEmployeeList(query = query)
-    }
-
-
-    fun onActions(employeeHomeActions: EmployeeHomeActions) {
-        viewModelScope.launch {
-            when (employeeHomeActions) {
-                EmployeeHomeActions.NavigateToAddEmployee -> navigateToAddEmployee()
-                is EmployeeHomeActions.OnSearchQueryChanged -> onSearchQueryChanged(query = employeeHomeActions.newQuery)
-                EmployeeHomeActions.ClearQuery -> clearQuery()
-                is EmployeeHomeActions.NavigateToEmployeeDetail -> navigateToEmployeeDetail(employee = employeeHomeActions.employee)
-                is EmployeeHomeActions.UpdateLoader -> updateLoader(isLoading = employeeHomeActions.isLoading)
-                is EmployeeHomeActions.UpdateEmployeeList -> updateEmployeeList(newEmployeeList = employeeHomeActions.newEmployeeList)
-                is EmployeeHomeActions.DeleteEmployee -> deleteEmployee(employee = employeeHomeActions.employee)
-                EmployeeHomeActions.DeleteEmployeeConfirmed -> deleteEmployeeConfirmed()
-                EmployeeHomeActions.HideDialog -> hideDialog()
-            }
-        }
     }
 
     private fun updateLoader(isLoading: Boolean) {
@@ -190,14 +172,14 @@ class EmployeeHomeViewModel @Inject constructor(
         }
     }
 
-    private fun hideDialog(){
+    private fun hideDialog() {
         _employeeHomeUiState.update { newState ->
             newState.copy(showDialog = false)
         }
     }
 
-    private fun showDialogProgressBar(dialogProgressBar: Boolean){
-        _employeeHomeUiState.update { newState->
+    private fun showDialogProgressBar(dialogProgressBar: Boolean) {
+        _employeeHomeUiState.update { newState ->
             newState.copy(dialogProgressBar = dialogProgressBar)
         }
     }

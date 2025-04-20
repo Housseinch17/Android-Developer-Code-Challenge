@@ -14,5 +14,6 @@ data class EmployeeHomeUiState(
     val isLoading: Boolean = true,
     val showDialog: Boolean = false,
     val currentEmployee: Result = Result(),
-    val dialogProgressBar: Boolean = false
+    val dialogProgressBar: Boolean = false,
+    val enableButtons: Boolean = true,
 )
