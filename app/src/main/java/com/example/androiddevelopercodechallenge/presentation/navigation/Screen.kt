@@ -16,12 +16,9 @@ sealed interface Screen {
     data object EmployeeHomeScreen: Screen
 
     @Serializable
-    data class EmployeeDetailScreen(val employee: Result = Result()): Screen
-
-    @Serializable
     data object AddEmployeeScreen: Screen
 
     @Serializable
-    data class EditEmployeeScreen(val employee: Result = Result()): Screen
+    data class EditEmployeeScreen(val employee: Result = Result(), val checked: Boolean = false): Screen
 
 }

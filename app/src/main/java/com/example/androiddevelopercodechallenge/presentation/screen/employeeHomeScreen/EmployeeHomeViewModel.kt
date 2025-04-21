@@ -24,7 +24,9 @@ import javax.inject.Inject
 
 sealed interface EmployeeHomeEvents {
     data object NavigateToAddEmployee : EmployeeHomeEvents
-    data class NavigateToEmployeeDetail(val employee: Result) : EmployeeHomeEvents
+    data class NavigateToEditEmployee(val employee: Result, val checked: Boolean) :
+        EmployeeHomeEvents
+
     data class DeleteEmployeeConfirmed(val deletedEmployee: Result) : EmployeeHomeEvents
 }
 
@@ -32,7 +34,9 @@ sealed interface EmployeeHomeActions {
     data object NavigateToAddEmployee : EmployeeHomeActions
     data class OnSearchQueryChanged(val newQuery: String) : EmployeeHomeActions
     data object ClearQuery : EmployeeHomeActions
-    data class NavigateToEmployeeDetail(val employee: Result) : EmployeeHomeActions
+    data class NavigateToEditEmployee(val employee: Result, val checked: Boolean) :
+        EmployeeHomeActions
+
     data class UpdateLoader(val isLoading: Boolean) : EmployeeHomeActions
     data class UpdateEmployeeList(val newEmployeeList: List<Result>) : EmployeeHomeActions
     data class DeleteEmployee(val employee: Result) : EmployeeHomeActions
@@ -65,7 +69,11 @@ class EmployeeHomeViewModel @Inject constructor(
                 EmployeeHomeActions.NavigateToAddEmployee -> navigateToAddEmployee()
                 is EmployeeHomeActions.OnSearchQueryChanged -> onSearchQueryChanged(query = employeeHomeActions.newQuery)
                 EmployeeHomeActions.ClearQuery -> clearQuery()
-                is EmployeeHomeActions.NavigateToEmployeeDetail -> navigateToEmployeeDetail(employee = employeeHomeActions.employee)
+                is EmployeeHomeActions.NavigateToEditEmployee -> navigateToEditEmployee(
+                    employee = employeeHomeActions.employee,
+                    checked = employeeHomeActions.checked
+                )
+
                 is EmployeeHomeActions.UpdateLoader -> updateLoader(isLoading = employeeHomeActions.isLoading)
                 is EmployeeHomeActions.UpdateEmployeeList -> updateEmployeeList(newEmployeeList = employeeHomeActions.newEmployeeList)
                 is EmployeeHomeActions.DeleteEmployee -> deleteEmployee(employee = employeeHomeActions.employee)
@@ -82,7 +90,8 @@ class EmployeeHomeViewModel @Inject constructor(
             //prefetchDistance when to load new items for example here 3 so im saying
             //when we reach the last 3 items load new page
             //initialLoadSize how many items i want  to load initial it's usually preferred to use same as pageSize
-            PagingConfig(pageSize = 20, prefetchDistance = 3, initialLoadSize = 20)
+            //here 8 since it's gridlayout 2 columns and size is small so need to fetch before
+            PagingConfig(pageSize = 20, prefetchDistance = 8, initialLoadSize = 20)
         ) {
             EmployeePaging(
                 employeeUseCase = employeeUseCase,
@@ -142,8 +151,13 @@ class EmployeeHomeViewModel @Inject constructor(
         }
     }
 
-    private suspend fun navigateToEmployeeDetail(employee: Result) {
-        _employeeHomeEvents.send(EmployeeHomeEvents.NavigateToEmployeeDetail(employee = employee))
+    private suspend fun navigateToEditEmployee(employee: Result, checked: Boolean) {
+        _employeeHomeEvents.send(
+            EmployeeHomeEvents.NavigateToEditEmployee(
+                employee = employee,
+                checked = checked
+            )
+        )
     }
 
     private fun clearQuery() {

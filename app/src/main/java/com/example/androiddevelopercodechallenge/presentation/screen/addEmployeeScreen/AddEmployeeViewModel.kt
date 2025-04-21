@@ -2,9 +2,13 @@ package com.example.androiddevelopercodechallenge.presentation.screen.addEmploye
 
 import android.content.Context
 import android.util.Log
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androiddevelopercodechallenge.R
+import com.example.androiddevelopercodechallenge.data.util.AddOrEditActions
+import com.example.androiddevelopercodechallenge.data.util.AddOrEditEvents.AddEmployeeEvents
+import com.example.androiddevelopercodechallenge.data.util.AddOrEditUiState.AddEmployeeUiState
 import com.example.androiddevelopercodechallenge.data.util.Country
 import com.example.androiddevelopercodechallenge.presentation.util.Constants.numberRegex
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,23 +21,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-sealed interface AddEmployeeEvents {
-    data object AddEmployee : AddEmployeeEvents
-    data class ShowMessage(val message: String) : AddEmployeeEvents
-}
-
-sealed interface AddEmployeeActions {
-    data class UpdateFirstName(val firstName: String) : AddEmployeeActions
-    data class UpdateLastName(val lastName: String) : AddEmployeeActions
-    data class UpdateEmail(val email: String) : AddEmployeeActions
-    data class UpdatePhoneNumber(val phoneNumber: String) : AddEmployeeActions
-    data object OnCountryExpand : AddEmployeeActions
-    data class UpdateSelectedCountry(val country: Country) : AddEmployeeActions
-    data object OnGenderExpand : AddEmployeeActions
-    data class UpdateSelectedGender(val gender: String) : AddEmployeeActions
-    data object AddEmployee : AddEmployeeActions
-}
 
 @HiltViewModel
 class AddEmployeeViewModel @Inject constructor(
@@ -58,21 +45,23 @@ class AddEmployeeViewModel @Inject constructor(
         Log.d("MyTag", "AddEmployeeViewModel: cleared")
     }
 
-    fun onActions(addEmployeeActions: AddEmployeeActions) {
+    fun onActions(addEmployeeActions: AddOrEditActions) {
         when (addEmployeeActions) {
-            is AddEmployeeActions.UpdateEmail -> updateEmail(email = addEmployeeActions.email)
-            is AddEmployeeActions.UpdateFirstName -> updateFirstName(firstName = addEmployeeActions.firstName)
-            is AddEmployeeActions.UpdateLastName -> updateLastName(lastName = addEmployeeActions.lastName)
-            is AddEmployeeActions.UpdatePhoneNumber -> updatePhoneNumber(phoneNumber = addEmployeeActions.phoneNumber)
-            AddEmployeeActions.OnCountryExpand -> onCountryExpand()
-            is AddEmployeeActions.UpdateSelectedCountry -> updateSelectedCountry(selectedCountry = addEmployeeActions.country)
-            AddEmployeeActions.OnGenderExpand -> onGenderExpand()
-            is AddEmployeeActions.UpdateSelectedGender -> updateSelectedGender(selectedGender = addEmployeeActions.gender)
-            is AddEmployeeActions.AddEmployee -> {
+            is AddOrEditActions.UpdateEmail -> updateEmail(email = addEmployeeActions.email)
+            is AddOrEditActions.UpdateFirstName -> updateFirstName(firstName = addEmployeeActions.firstName)
+            is AddOrEditActions.UpdateLastName -> updateLastName(lastName = addEmployeeActions.lastName)
+            is AddOrEditActions.UpdatePhoneNumber -> updatePhoneNumber(phoneNumber = addEmployeeActions.phoneNumber)
+            AddOrEditActions.OnCountryExpand -> onCountryExpand()
+            is AddOrEditActions.UpdateSelectedCountry -> updateSelectedCountry(selectedCountry = addEmployeeActions.country)
+            AddOrEditActions.OnGenderExpand -> onGenderExpand()
+            is AddOrEditActions.UpdateSelectedGender -> updateSelectedGender(selectedGender = addEmployeeActions.gender)
+            is AddOrEditActions.AddOrSaveEmployee -> {
                 viewModelScope.launch {
                     addEmployee()
                 }
             }
+
+            else -> {}
         }
     }
 
@@ -83,8 +72,13 @@ class AddEmployeeViewModel @Inject constructor(
         if (employee.name.first.isNotBlank() && employee.name.last.isNotBlank() &&
             employee.email.isNotBlank() && employee.phone.isNotBlank()
         ) {
-            _addEmployeeEvents.send(AddEmployeeEvents.AddEmployee)
-            resetState()
+            if(Patterns.EMAIL_ADDRESS.matcher(employee.email).matches()) {
+                _addEmployeeEvents.send(AddEmployeeEvents.AddEmployee)
+                resetState()
+            }else{
+                val validEmail = context.getString(R.string.please_use_valid_email) +"!"
+                _addEmployeeEvents.send(AddEmployeeEvents.ShowMessage(message = validEmail))
+            }
         } else {
             val requiredFields =
                 context.getString(R.string.required_fields) + " " + context.getString(R.string.are_empty) + "!"
@@ -123,7 +117,7 @@ class AddEmployeeViewModel @Inject constructor(
     }
 
     private fun updatePhoneNumber(phoneNumber: String) {
-        if (phoneNumber.matches(numberRegex)) {
+        if (phoneNumber.isEmpty() || phoneNumber.matches(numberRegex)) {
             _addEmployeeUiState.update { newState ->
                 newState.copy(employee = newState.employee.copy(phone = phoneNumber))
             }

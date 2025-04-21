@@ -8,9 +8,11 @@ object Constants {
     //usually fetched from api but here we use it as constant
     const val RESULTS = 20
 
-    val gender = listOf<String>("Male", "Female")
+    val gender = listOf<String>("male", "female")
 
     val numberRegex = Regex("^\\d+$")
+
+    val toggleList = listOf("On","Off")
 
 
     //if list is small it will show below dropDownMenu

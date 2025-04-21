@@ -13,17 +13,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -32,11 +33,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -54,12 +57,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -190,16 +195,18 @@ fun EmployeeHomeScreen(
                         onActions(EmployeeHomeActions.OnSearchQueryChanged(newQuery = newQuery))
                     }
                 )
+                Spacer(modifier = Modifier.height(20.dp))
             }
 
             if (state.searchQuery.isBlank()) {
                 //to remove scrolling effect in lazyColumn
                 CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(20.dp),
-                        horizontalAlignment = Alignment.Start,
-                        contentPadding = PaddingValues(vertical = 20.dp),
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 20.dp),
                     ) {
                         items(count = employeeItems.itemCount) { index ->
                             val item = employeeItems[index]!!
@@ -207,11 +214,25 @@ fun EmployeeHomeScreen(
                             EmployeeCard(
                                 modifier = Modifier.fillMaxWidth(),
                                 employee = item,
-                                onClick = { employee ->
-                                    onActions(EmployeeHomeActions.NavigateToEmployeeDetail(employee = employee))
+                                onClick = { employee, checked ->
+                                    onActions(
+                                        EmployeeHomeActions.NavigateToEditEmployee(
+                                            employee = employee,
+                                            checked = checked
+                                        )
+                                    )
                                 },
                                 onDeleteClick = { employee ->
                                     onActions(EmployeeHomeActions.DeleteEmployee(employee = employee))
+                                },
+                                onEditClick = { employee, checked ->
+                                    onActions(
+                                        EmployeeHomeActions.NavigateToEditEmployee(
+                                            employee = employee,
+                                            checked = checked
+                                        )
+                                    )
+                                    Log.d("MyTag", "hey: $checked")
                                 }
                             )
                         }
@@ -289,10 +310,12 @@ fun EmployeeHomeScreen(
             } else {
                 //to remove scrolling effect in lazyColumn
                 CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(20.dp),
-                        contentPadding = PaddingValues(vertical = 20.dp)
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 20.dp)
                     ) {
                         //id can be null
                         //key for better performance
@@ -300,14 +323,27 @@ fun EmployeeHomeScreen(
                             result.id.value ?: result.email
                         }) { employee ->
                             EmployeeCard(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
                                 employee = employee,
-                                onClick = { employee ->
-                                    onActions(EmployeeHomeActions.NavigateToEmployeeDetail(employee = employee))
+                                onClick = { employee, checked ->
+                                    onActions(
+                                        EmployeeHomeActions.NavigateToEditEmployee(
+                                            employee = employee,
+                                            checked = checked
+                                        )
+                                    )
                                 },
                                 onDeleteClick = { employee ->
-
-                                }
+                                    onActions(EmployeeHomeActions.DeleteEmployee(employee = employee))
+                                },
+                                onEditClick = { employee, checked ->
+                                    onActions(
+                                        EmployeeHomeActions.NavigateToEditEmployee(
+                                            employee = employee,
+                                            checked = checked
+                                        )
+                                    )
+                                },
                             )
                         }
                     }
@@ -321,63 +357,98 @@ fun EmployeeHomeScreen(
 @Preview
 @Composable
 fun ShimmerEmployeeCard() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(bottom = 20.dp)
     ) {
-        Card(
-            modifier = Modifier
-                .padding(top = 50.dp)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp)),
-            colors = CardDefaults.cardColors(containerColor = CardBackground)
-        ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                IconButton(
-                    onClick = {},
+        items(count = 8) {
+            Box(
+                modifier = Modifier
+            ) {
+                Card(
                     modifier = Modifier
-                        .size(48.dp)
-                        .padding(top = 10.dp, end = 10.dp)
-                        .align(Alignment.TopEnd),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        contentColor = Color.Transparent,
-                        containerColor = Color.Transparent
-                    )
+                        .clip(RoundedCornerShape(size = 12.dp)),
+                    colors = CardDefaults.cardColors(containerColor = CardBackground)
                 ) {
-                    ShimmerEffect(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                    )
-                }
+                    Box {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            ShimmerEffect(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(60.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                            )
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 66.dp, bottom = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    repeat(3) {
+                            ShimmerEffect(
+                                modifier = Modifier
+                                    .padding(top = 50.dp)
+                                    .fillMaxWidth(0.6f)
+                                    .height(20.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                            )
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            ShimmerEffect(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.7f)
+                                    .height(16.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                            )
+
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            ShimmerEffect(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.5f)
+                                    .height(14.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                            )
+
+                            Spacer(modifier = Modifier.height(10.dp))
+                            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Row with icon buttons
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                repeat(2) {
+                                    ShimmerEffect(
+                                        modifier = Modifier
+                                            .size(28.dp)
+                                            .clip(CircleShape)
+                                    )
+                                }
+                            }
+                        }
+
+                        // Large shimmer profile picture on top
                         ShimmerEffect(
                             modifier = Modifier
-                                .fillMaxWidth(0.8f)
-                                .height(20.dp)
-                                .clip(RoundedCornerShape(4.dp))
+                                .padding(top = 20.dp)
+                                .size(80.dp)
+                                .align(Alignment.TopCenter)
+                                .clip(CircleShape)
+                                .background(AvatarCircle)
+                                .border(2.dp, Color.White, shape = CircleShape)
                         )
                     }
                 }
             }
-        }
 
-        // Shimmer profile picture
-        ShimmerEffect(
-            modifier = Modifier
-                .size(100.dp)
-                .align(Alignment.TopCenter)
-                .clip(CircleShape)
-                .background(AvatarCircle)
-        )
+        }
     }
 }
 
@@ -386,82 +457,135 @@ fun ShimmerEmployeeCard() {
 fun EmployeeCard(
     modifier: Modifier = Modifier,
     employee: Result,
-    onClick: (Result) -> Unit,
+    onClick: ((Result, Boolean) -> Unit)? = null,
     onDeleteClick: (Result) -> Unit,
+    onEditClick: (Result, Boolean) -> Unit,
 ) {
     Box(
         modifier = modifier
     ) {
         Card(
             modifier = Modifier
-                .padding(top = 50.dp)
                 .clip(RoundedCornerShape(size = 12.dp))
                 .clickable(
                     onClick = {
-                        onClick(employee)
+                        if (onClick != null) {
+                            onClick(employee, false)
+                        }
                     }),
             colors = CardDefaults.cardColors(containerColor = CardBackground),
         ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                IconButton(
-                    onClick = {
-                        onDeleteClick(employee)
-                    },
-                    modifier = Modifier
-                        .size(48.dp)
-                        .padding(top = 10.dp, end = 10.dp)
-                        .align(Alignment.TopEnd),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        contentColor = Color.Red,
-                        containerColor = Color.Transparent
-                    )
-                ) {
-                    Icon(
-                        modifier = Modifier.fillMaxSize(),
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = stringResource(R.string.delete),
-                        tint = LocalContentColor.current,
-                    )
-                }
-
+            Box {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 66.dp, bottom = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(space = 16.dp)
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        modifier = Modifier,
-                        text = "${employee.name.first} ${employee.name.last}",
-                        style = Typography.titleMedium
+                    ProfilePicture(
+                        modifier = Modifier
+                            .height(60.dp)
+                            .fillMaxWidth(),
+                        imageUrl = employee.picture.thumbnail,
+                        contentScale = ContentScale.FillBounds
                     )
 
-                    Text(
-                        modifier = Modifier,
-                        text = stringResource(R.string.street) + ": ${employee.location.street.name}, ${employee.location.street.number}",
-                        style = Typography.bodyMedium
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 50.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        Text(
+                            modifier = Modifier,
+                            text = "${employee.name.first} ${employee.name.last}",
+                            style = Typography.titleMedium,
+                            maxLines = 1,
+                            textAlign = TextAlign.Center
 
-                    Text(
-                        modifier = Modifier,
-                        text = stringResource(R.string.id) + ": ${employee.id.value}",
-                        style = Typography.labelSmall
-                    )
+                        )
 
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            modifier = Modifier,
+                            text = stringResource(R.string.street) + ": ${employee.location.street.name}, ${employee.location.street.number}",
+                            style = Typography.bodyMedium,
+                            maxLines = 1,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Text(
+                            modifier = Modifier,
+                            text = stringResource(R.string.id) + ": ${employee.id.value}",
+                            style = Typography.labelSmall,
+                            maxLines = 1,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+                        HorizontalDivider(modifier = Modifier.fillMaxWidth())
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    onDeleteClick(employee)
+                                },
+                                modifier = Modifier
+                                    .size(28.dp),
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    contentColor = Color.Red,
+                                    containerColor = Color.Transparent
+                                )
+                            ) {
+                                Icon(
+                                    modifier = Modifier,
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = stringResource(R.string.delete),
+                                    tint = LocalContentColor.current,
+                                )
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    onEditClick(employee, true)
+                                },
+                                modifier = Modifier
+                                    .size(28.dp),
+                            ) {
+                                Icon(
+                                    modifier = Modifier,
+                                    imageVector = Icons.Filled.Edit,
+                                    contentDescription = stringResource(R.string.edt),
+                                    tint = Color.Unspecified,
+                                )
+                            }
+                        }
+                    }
                 }
 
+                ProfilePicture(
+                    modifier = Modifier
+                        .padding(top = 20.dp)
+                        .size(80.dp)
+                        .align(Alignment.TopCenter)
+                        .clip(CircleShape)
+                        .background(AvatarCircle)
+                        .border(2.dp, Color.White, shape = CircleShape),
+                    imageUrl = employee.picture.large,
+                    contentScale = ContentScale.Crop
+                )
             }
         }
 
-        ProfilePicture(
-            modifier = Modifier
-                .size(100.dp)
-                .align(Alignment.TopCenter)
-                .clip(CircleShape)
-                .background(AvatarCircle),
-            imageUrl = employee.picture.large
-        )
     }
 }
 
@@ -559,9 +683,11 @@ fun SearchView(
 
 @Composable
 fun ShimmerFloatingButton() {
-    ShimmerEffect(modifier = Modifier
-        .size(56.dp)
-        .clip(CircleShape))
+    ShimmerEffect(
+        modifier = Modifier
+            .size(56.dp)
+            .clip(CircleShape)
+    )
 }
 
 @Composable
@@ -593,7 +719,8 @@ fun ProfilePicturePreview() {
         modifier = Modifier
             .size(100.dp)
             .clip(CircleShape),
-        imageUrl = "https://randomuser.me/api/portraits/women/55.jpg"
+        imageUrl = "https://randomuser.me/api/portraits/women/55.jpg",
+        contentScale = ContentScale.Crop
     )
 }
 

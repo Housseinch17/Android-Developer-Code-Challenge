@@ -2,9 +2,7 @@ package com.example.androiddevelopercodechallenge.data.util
 
 import com.example.androiddevelopercodechallenge.presentation.util.Constants
 
-val country = Constants.countryList.entries.first()
-
 data class Country(
-    val countryFlag: Int = country.value.countryFlag,
-    val extension: String = country.value.extension
+    val countryFlag: Int = Constants.countryList.entries.first().value.countryFlag,
+    val extension: String = Constants.countryList.entries.first().value.extension
 )
