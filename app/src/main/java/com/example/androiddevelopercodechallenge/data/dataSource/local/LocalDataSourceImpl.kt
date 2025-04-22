@@ -1,6 +1,7 @@
 package com.example.androiddevelopercodechallenge.data.dataSource.local
 
 import android.util.Log
+import androidx.paging.PagingSource
 import com.example.androiddevelopercodechallenge.data.model.Result
 import com.example.androiddevelopercodechallenge.data.roomDB.ResultDAO
 import kotlinx.coroutines.CoroutineDispatcher
@@ -25,6 +26,11 @@ class LocalDataSourceImpl @Inject constructor(
             }
         }
 
+//    override fun getPagingResults(): PagingSource<Int, Result> {
+//        Log.d("MyTag", "LocalDataSourceImpl: getPagingResults(): called")
+//        return resultDAO.getPagingResults()
+//    }
+
     override suspend fun getAllResults(): Flow<List<Result>> = withContext(coroutineDispatcher) {
         try {
             Log.d("MyTag", "LocalDataSourceImpl: getAllResults(): successfully completed")
@@ -44,7 +50,7 @@ class LocalDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateResult(result: Result) = withContext(coroutineDispatcher) {
+    override suspend fun updateResult(result: Result): Unit = withContext(coroutineDispatcher) {
         try {
             resultDAO.updateResult(result = result)
             Log.d("MyTag", "LocalDataSourceImpl: updateResult(): successfully completed")
@@ -53,12 +59,25 @@ class LocalDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteResultsByEmail(email: String) = withContext(coroutineDispatcher) {
+    override suspend fun deleteResultsByEmail(email: String): Unit =
+        withContext(coroutineDispatcher) {
+            try {
+                resultDAO.deleteResultsByEmail(email = email)
+                Log.d(
+                    "MyTag",
+                    "LocalDataSourceImpl: deleteResultsById(): successfully completed: email:$email"
+                )
+            } catch (e: Exception) {
+                Log.e("MyTag", "LocalDataSourceImpl: deleteResultsById(): failed ${e.message}")
+            }
+        }
+
+    override suspend fun deleteAll() {
         try {
-            resultDAO.deleteResultsByEmail(email = email)
-            Log.d("MyTag", "LocalDataSourceImpl: deleteResultsById(): successfully completed: email:$email")
+            resultDAO.deleteAll()
+            Log.d("MyTag", "LocalDataSourceImpl: deleteAll(): successfully completed")
         } catch (e: Exception) {
-            Log.e("MyTag", "LocalDataSourceImpl: deleteResultsById(): failed ${e.message}")
+            Log.e("MyTag", "LocalDataSourceImpl: deleteAll(): failed ${e.message}")
         }
     }
 }

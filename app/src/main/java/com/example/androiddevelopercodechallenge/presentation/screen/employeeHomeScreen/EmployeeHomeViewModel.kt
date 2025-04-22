@@ -9,7 +9,7 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import com.example.androiddevelopercodechallenge.data.model.Result
 import com.example.androiddevelopercodechallenge.data.paging.EmployeePaging
-import com.example.androiddevelopercodechallenge.domain.useCase.EmployeeUseCase
+import com.example.androiddevelopercodechallenge.domain.useCase.employee.EmployeeUseCase
 import com.example.androiddevelopercodechallenge.domain.useCase.local.LocalUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -47,9 +47,9 @@ sealed interface EmployeeHomeActions {
     data class DeleteEmployeeConfirmed(val employee: Result) : EmployeeHomeActions
     data class DeleteLocalEmployeeConfirmed(val employee: Result) : EmployeeHomeActions
     data object HideDialog : EmployeeHomeActions
-    data object HideLocalDialog: EmployeeHomeActions
+    data object HideLocalDialog : EmployeeHomeActions
     data class EnableButtons(val enableButtons: Boolean) : EmployeeHomeActions
-
+    data object IsPagingQuery : EmployeeHomeActions
     data object GetAllResults : EmployeeHomeActions
 }
 
@@ -64,8 +64,16 @@ class EmployeeHomeViewModel @Inject constructor(
     )
     val employeeUiState: StateFlow<EmployeeHomeUiState> = _employeeHomeUiState.asStateFlow()
 
+    private val _employeeHomeDialogState: MutableStateFlow<EmployeeHomeDialogState> =
+        MutableStateFlow(
+            EmployeeHomeDialogState()
+        )
+    val employeeHomeDialogState: StateFlow<EmployeeHomeDialogState> =
+        _employeeHomeDialogState.asStateFlow()
+
     private val _employeeHomeEvents: Channel<EmployeeHomeEvents> = Channel()
     val employeeHomeEvents = _employeeHomeEvents.receiveAsFlow()
+
 
     init {
         Log.d("MyTag", "EmployeeHomeViewModel: Started")
@@ -91,11 +99,22 @@ class EmployeeHomeViewModel @Inject constructor(
                 EmployeeHomeActions.HideDialog -> hideDialog()
                 is EmployeeHomeActions.EnableButtons -> enableButtons(enableButtons = employeeHomeActions.enableButtons)
                 EmployeeHomeActions.GetAllResults -> getAllResults()
-                is EmployeeHomeActions.DeleteLocalEmployeeConfirmed -> deleteLocalEmployeeConfirmed(employee = employeeHomeActions.employee)
+                is EmployeeHomeActions.DeleteLocalEmployeeConfirmed -> deleteLocalEmployeeConfirmed(
+                    employee = employeeHomeActions.employee
+                )
+
                 EmployeeHomeActions.HideLocalDialog -> hideLocalDialog()
+                EmployeeHomeActions.IsPagingQuery -> isPagingQuery()
             }
         }
     }
+
+    private fun isPagingQuery() {
+        _employeeHomeUiState.update { newState ->
+            newState.copy(isPagingQuery = false)
+        }
+    }
+
 
     fun getEmployee() {
         val employeePager = Pager(
@@ -113,6 +132,7 @@ class EmployeeHomeViewModel @Inject constructor(
         }.flow.cachedIn(viewModelScope)
 
         viewModelScope.launch {
+            Log.d("MyTag", "entered here")
             _employeeHomeUiState.update { newState ->
                 newState.copy(employeePagingData = employeePager)
             }
@@ -125,17 +145,16 @@ class EmployeeHomeViewModel @Inject constructor(
         results.collect { result ->
             //show local shimmer
             _employeeHomeUiState.update { newState ->
-                newState.copy(localIsLoading = true)
+                newState.copy(localIsLoading = true, isLoading = false)
             }
             if (result.isNotEmpty()) {
                 _employeeHomeUiState.update { newState ->
-                    newState.copy(localEmployeeResults = result)
+                    newState.copy(
+                        localEmployeeResults = result,
+                        filteredLocalEmployeeResults = result,
+                        localIsLoading = false
+                    )
                 }
-            }
-
-            //hide local shimmer
-            _employeeHomeUiState.update { newState ->
-                newState.copy(localIsLoading = false)
             }
         }
     }
@@ -147,17 +166,36 @@ class EmployeeHomeViewModel @Inject constructor(
             newState.copy(
                 employeeList = newEmployeeList,
                 filteredEmployeeList = newEmployeeList,
+                isLoading = false,
+                isPagingQuery = true
             )
         }
         //filterEmployeeList again when the composable recompose after onStart/onResume (navigating back to EmployeeHomeScreen)
         filterEmployeeList(query = _employeeHomeUiState.value.searchQuery)
+        clearQuery()
     }
 
     private fun enableButtons(enableButtons: Boolean) {
-        Log.d("MyTag","EmployeeHomeViewModel enabledButtons()")
+        Log.d("MyTag", "EmployeeHomeViewModel enabledButtons()")
         _employeeHomeUiState.update { newState ->
             newState.copy(enableButtons = enableButtons)
         }
+    }
+
+    private fun filterLocalEmployeeList(query: String) {
+        Log.d("MyTag","now ${_employeeHomeUiState.value.filteredLocalEmployeeResults.size}")
+        _employeeHomeUiState.update { newState ->
+            val filteredLocalEmployeeList = if (query.isBlank()) {
+                newState.localEmployeeResults
+            } else {
+                newState.localEmployeeResults.filter { employee ->
+                    employee.name.first.contains(query, ignoreCase = true) ||
+                            employee.name.last.contains(query, ignoreCase = true)
+                }
+            }
+            newState.copy(filteredLocalEmployeeResults = filteredLocalEmployeeList)
+        }
+        Log.d("MyTag","now ${_employeeHomeUiState.value.filteredLocalEmployeeResults.size}")
     }
 
     private fun filterEmployeeList(query: String) {
@@ -174,12 +212,19 @@ class EmployeeHomeViewModel @Inject constructor(
         }
     }
 
-
     fun onSearchQueryChanged(query: String) {
+        Log.d("MyTag","query: $query and isPagingQuery: ${_employeeHomeUiState.value.isPagingQuery}")
         _employeeHomeUiState.update { newState ->
             newState.copy(searchQuery = query)
         }
-        filterEmployeeList(query = query)
+        if (_employeeHomeUiState.value.isPagingQuery) {
+            filterEmployeeList(query = query)
+            Log.d("MyTag","12")
+        } else {
+            Log.d("MyTag","searchquery: ${_employeeHomeUiState.value.searchQuery}")
+            filterLocalEmployeeList(query = query)
+            Log.d("MyTag","34")
+        }
     }
 
     private fun updateLoader(isLoading: Boolean) {
@@ -211,49 +256,59 @@ class EmployeeHomeViewModel @Inject constructor(
 
     private suspend fun deleteLocalEmployeeConfirmed(employee: Result) {
         showLocalDialogProgressBar()
-        Log.d("MyTag","employeeUId: ${employee.email}")
+        Log.d("MyTag", "employeeUId: ${employee.email}")
         try {
             localUseCase.deleteResultsByEmail(email = employee.email)
             delay(500)
             _employeeHomeEvents.send(EmployeeHomeEvents.DeleteEmployeeConfirmed(deletedEmployee = _employeeHomeUiState.value.currentEmployee))
-        }catch (e: Exception){
-            Log.e("MyTag","EmployeeHomeViewModel: deleteLocalEmployee: error: ${e.message}" )
+        } catch (e: Exception) {
+            Log.e("MyTag", "EmployeeHomeViewModel: deleteLocalEmployee: error: ${e.message}")
         }
         hideLocalDialog()
     }
 
     private suspend fun deleteEmployeeConfirmed(employee: Result) {
-        Log.d("MyTag","deleteEmployeeConfirmed: $employee")
+        Log.d("MyTag", "deleteEmployeeConfirmed: $employee")
         showDialogProgressBar()
-        val employeePagingData = _employeeHomeUiState.value.employeePagingData
-        val newEmployeePagingData = employeePagingData.map { pagingData ->
-            pagingData.filter { it != employee }
-        }
 
         //delete from db
         localUseCase.deleteResultsByEmail(email = employee.email)
 
         delay(500)
+
+        //Not recommended at all to filter paging like that
+        //but no api to delete employee
+        //best way is to  delete employee through api and use .refresh() so pager will load updated
+        val employeePagingData = _employeeHomeUiState.value.employeePagingData
+        val newEmployeePagingData = employeePagingData.map { pagingData ->
+            pagingData.filter { it != employee }
+        }
+
         _employeeHomeUiState.update { newState ->
             newState.copy(employeePagingData = newEmployeePagingData)
         }
         _employeeHomeEvents.send(EmployeeHomeEvents.DeleteEmployeeConfirmed(deletedEmployee = _employeeHomeUiState.value.currentEmployee))
         hideDialog()
+
     }
 
     private fun deleteEmployee(employee: Result) {
-        Log.d("MyTag","employee: $employee now")
+        Log.d("MyTag", "employee: $employee now")
         _employeeHomeUiState.update { newState ->
-            newState.copy(currentEmployee = employee, showDialog = true)
+            newState.copy(currentEmployee = employee)
+        }
+        _employeeHomeDialogState.update { newState ->
+            newState.copy(showDialog = true)
         }
     }
 
     private fun deleteLocalEmployee(employee: Result) {
-        Log.d("MyTag","employee: $employee now")
+        Log.d("MyTag", "employee: $employee now")
         _employeeHomeUiState.update { newState ->
             newState.copy(currentEmployee = employee, showLocalDialog = true)
         }
     }
+
     private fun hideLocalDialog() {
         _employeeHomeUiState.update { newState ->
             newState.copy(showLocalDialog = false, localDialogProgressBar = false)
@@ -265,14 +320,15 @@ class EmployeeHomeViewModel @Inject constructor(
             newState.copy(localDialogProgressBar = true)
         }
     }
+
     private fun hideDialog() {
-        _employeeHomeUiState.update { newState ->
+        _employeeHomeDialogState.update { newState ->
             newState.copy(showDialog = false, dialogProgressBar = false)
         }
     }
 
     private fun showDialogProgressBar() {
-        _employeeHomeUiState.update { newState ->
+        _employeeHomeDialogState.update { newState ->
             newState.copy(dialogProgressBar = true)
         }
     }

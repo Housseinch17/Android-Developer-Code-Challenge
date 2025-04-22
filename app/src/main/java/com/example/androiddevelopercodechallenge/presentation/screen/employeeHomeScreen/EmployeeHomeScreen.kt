@@ -101,6 +101,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun EmployeeHomeScreen(
     modifier: Modifier = Modifier,
     state: EmployeeHomeUiState,
+    dialogState: EmployeeHomeDialogState,
     onActions: (EmployeeHomeActions) -> Unit,
 ) {
     Scaffold(
@@ -127,10 +128,10 @@ fun EmployeeHomeScreen(
             ShowDialog(
                 modifier = Modifier,
                 title = stringResource(R.string.delete_employee),
-                isProgressBar = state.dialogProgressBar,
-                showDialog = state.showDialog,
+                isProgressBar = dialogState.dialogProgressBar,
+                showDialog = dialogState.showDialog,
                 description = {
-                    if (state.dialogProgressBar) {
+                    if (dialogState.dialogProgressBar) {
                         Box(modifier = Modifier.fillMaxWidth()) {
                             CircularProgressIndicator(
                                 modifier = Modifier
@@ -173,12 +174,11 @@ fun EmployeeHomeScreen(
 }
 
 @OptIn(ExperimentalFoundationApi::class)
-
 @Composable
 fun EmployeeContent(
     state: EmployeeHomeUiState,
     onActions: (EmployeeHomeActions) -> Unit,
-){
+) {
     Column(
         modifier = Modifier
     ) {
@@ -187,19 +187,22 @@ fun EmployeeContent(
         }
         val employeeItems = state.employeePagingData.collectAsLazyPagingItems()
 
+
         Log.d("MyTag", "employeeItems: ${employeeItems.itemCount}")
         Log.d("MyTag", "employeeListSize: ${state.employeeList.size}")
         Log.d("MyTag", "filteredEmployeeListSize: ${state.filteredEmployeeList.size}")
 
-        LaunchedEffect(employeeItems) {
+        LaunchedEffect(employeeItems.itemSnapshotList.isNotEmpty()) {
             //converting employeeItems from state to flow
             snapshotFlow {
                 Log.d("MyTag", "items: ${employeeItems.itemSnapshotList.items}")
                 employeeItems.itemSnapshotList.items
             }
                 .collectLatest { itemList ->
-                    Log.d("MyTag", "itemList: $itemList")
-                    onActions(EmployeeHomeActions.UpdateEmployeeList(newEmployeeList = itemList))
+                    if (itemList.isNotEmpty()) {
+                        Log.d("MyTag", "itemList: $itemList")
+                        onActions(EmployeeHomeActions.UpdateEmployeeList(newEmployeeList = itemList))
+                    }
                 }
         }
 
@@ -229,6 +232,163 @@ fun EmployeeContent(
                 }
             )
             Spacer(modifier = Modifier.height(20.dp))
+        }
+
+        //refresh state of paging(loading, error, notLoading)
+        val refreshState = employeeItems.loadState.refresh
+
+        when (refreshState) {
+            is LoadState.Error -> {
+
+                Log.e("MyTag", "refreshState Error: ${refreshState.error}")
+                onActions(EmployeeHomeActions.UpdateLoader(isLoading = false))
+                //disable searchView and floatingButton
+//                    onActions(EmployeeHomeActions.EnableButtons(enableButtons = false))
+                //search filter paging list not room db list
+                onActions(EmployeeHomeActions.IsPagingQuery)
+
+                if (onceReset) {
+                    onceReset = false
+                    onActions(EmployeeHomeActions.GetAllResults)
+                }
+
+                Log.d(
+                    "MyTag",
+                    "filteredLocalEmployeeResults: ${state.filteredLocalEmployeeResults.size}"
+                )
+                //show error
+                Box(
+                    modifier = Modifier,
+                ) {
+                    ShowDialog(
+                        modifier = Modifier,
+                        title = stringResource(R.string.delete_employee),
+                        isProgressBar = state.localDialogProgressBar,
+                        showDialog = state.showLocalDialog,
+                        description = {
+                            if (state.localDialogProgressBar) {
+                                Box(modifier = Modifier.fillMaxWidth()) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .size(80.dp)
+                                            .align(Alignment.Center),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        strokeWidth = 2.dp
+                                    )
+                                }
+                            } else {
+                                Text(
+                                    modifier = Modifier,
+                                    text = buildAnnotatedString {
+                                        append(stringResource(R.string.are_you_sure_want_to_delete))
+                                        append(": ")
+                                        withStyle(
+                                            style = SpanStyle(
+                                                fontFamily = Roboto_Semi_bold,
+                                                fontSize = 16.sp,
+                                                color = Color.Red,
+                                            )
+                                        ) {
+                                            append("${state.currentEmployee.name.first} ${state.currentEmployee.name.last}")
+                                        }
+                                        append("?")
+                                    }
+                                )
+                            }
+                        },
+                        confirmText = stringResource(R.string.delete),
+                        confirmButton = {
+                            onActions(
+                                EmployeeHomeActions.DeleteLocalEmployeeConfirmed(
+                                    employee = state.currentEmployee
+                                )
+                            )
+                        },
+                        onDismissButton = {
+                            onActions(EmployeeHomeActions.HideLocalDialog)
+                        }
+                    )
+
+                    // employeeItems.refresh() new paging with new instance
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top,
+                    ) {
+                        PagingError(
+                            id = R.string.refresh,
+                            onPagingPerform = {
+                                employeeItems.refresh()
+                            },
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        if (state.localIsLoading) {
+                            ShimmerLocalEmployeeCard(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 20.dp)
+                            )
+                        } else {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 20.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                contentPadding = PaddingValues(bottom = 20.dp)
+                            ) {
+                                //id can be null
+                                //key for better performance
+                                items(items = state.filteredLocalEmployeeResults, key = { result ->
+                                    result.id.value ?: result.email
+                                }) { employee ->
+                                    EmployeeCard(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        employee = employee,
+                                        onClick = { employee, checked ->
+                                            onActions(
+                                                EmployeeHomeActions.NavigateToEditEmployee(
+                                                    employee = employee,
+                                                    checked = checked
+                                                )
+                                            )
+                                        },
+                                        onDeleteClick = { employee ->
+                                            onActions(
+                                                EmployeeHomeActions.DeleteLocalEmployee(
+                                                    employee = employee
+                                                )
+                                            )
+                                        },
+                                        onEditClick = { employee, checked ->
+                                            onActions(
+                                                EmployeeHomeActions.NavigateToEditEmployee(
+                                                    employee = employee,
+                                                    checked = checked
+                                                )
+                                            )
+                                        })
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            LoadState.Loading -> {
+                Log.d("MyTag", "refreshState: Loading")
+                //update loader
+                onActions(EmployeeHomeActions.UpdateLoader(isLoading = true))
+                //enable button: if error happens handled to disable
+//                    onActions(EmployeeHomeActions.EnableButtons(enableButtons = true))
+            }
+
+            is LoadState.NotLoading -> {
+                Log.d("MyTag", "refreshState: NotLoading")
+                onActions(EmployeeHomeActions.UpdateLoader(isLoading = false))
+            }
         }
 
         if (state.searchQuery.isBlank()) {
@@ -278,12 +438,12 @@ fun EmployeeContent(
                     when (appendState) {
                         is LoadState.Error -> {
                             Log.e("MyTag", "appendState Error: ${appendState.error}")
-                            //disable searchView and floatingButton
-                            onActions(EmployeeHomeActions.EnableButtons(enableButtons = false))
+//                            //disable searchView and floatingButton
+//                            onActions(EmployeeHomeActions.EnableButtons(enableButtons = false))
 
                             //show error
                             //employeeItems.retry() will retry to fetch last page
-                            item(span = { GridItemSpan(maxLineSpan)}){
+                            item(span = { GridItemSpan(maxLineSpan) }) {
                                 PagingError(
                                     id = R.string.retry,
                                     onPagingPerform = { employeeItems.retry() }
@@ -294,168 +454,26 @@ fun EmployeeContent(
                         LoadState.Loading -> {
                             Log.d("MyTag", "appendState: Loading")
                             //enable button: if error happens handled to disable
-                            onActions(EmployeeHomeActions.EnableButtons(enableButtons = true))
+//                            onActions(EmployeeHomeActions.EnableButtons(enableButtons = true))
 
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 LoadingItems()
                             }
-                        }
 
-                        is LoadState.NotLoading -> onActions(
-                            EmployeeHomeActions.UpdateLoader(
-                                isLoading = false
-                            )
-                        )
-                    }
-                }
-
-                //refresh state of paging(loading, error, notLoading)
-                val refreshState = employeeItems.loadState.refresh
-
-                when (refreshState) {
-                    is LoadState.Error -> {
-                        Log.e("MyTag", "refreshState Error: ${refreshState.error}")
-                        //disable searchView and floatingButton
-                        onActions(EmployeeHomeActions.EnableButtons(enableButtons = false))
-
-                        if(onceReset){
-                            onceReset = false
-                            onActions(EmployeeHomeActions.GetAllResults)
-                        }
-
-
-                        //show error
-                        Box(
-                            modifier = Modifier,
-                        ){
-                            ShowDialog(
-                                modifier = Modifier,
-                                title = stringResource(R.string.delete_employee),
-                                isProgressBar = state.localDialogProgressBar,
-                                showDialog = state.showLocalDialog,
-                                description = {
-                                    if (state.localDialogProgressBar) {
-                                        Box(modifier = Modifier.fillMaxWidth()) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier
-                                                    .size(80.dp)
-                                                    .align(Alignment.Center),
-                                                color = MaterialTheme.colorScheme.primary,
-                                                strokeWidth = 2.dp
-                                            )
-                                        }
-                                    } else {
-                                        Text(
-                                            modifier = Modifier,
-                                            text = buildAnnotatedString {
-                                                append(stringResource(R.string.are_you_sure_want_to_delete))
-                                                append(": ")
-                                                withStyle(
-                                                    style = SpanStyle(
-                                                        fontFamily = Roboto_Semi_bold,
-                                                        fontSize = 16.sp,
-                                                        color = Color.Red,
-                                                    )
-                                                ) {
-                                                    append("${state.currentEmployee.name.first} ${state.currentEmployee.name.last}")
-                                                }
-                                                append("?")
-                                            }
-                                        )
-                                    }
-                                },
-                                confirmText = stringResource(R.string.delete),
-                                confirmButton = {
-                                    onActions(EmployeeHomeActions.DeleteLocalEmployeeConfirmed(employee = state.currentEmployee))
-                                },
-                                onDismissButton = {
-                                    onActions(EmployeeHomeActions.HideLocalDialog)
-                                }
-                            )
-
-                            // employeeItems.refresh() new paging with new instance
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                            ) {
-                                PagingError(
-                                    id = R.string.refresh,
-                                    onPagingPerform = { employeeItems.refresh() },
+                            onActions(
+                                EmployeeHomeActions.UpdateLoader(
+                                    isLoading = false
                                 )
+                            )
+                        }
 
-                                if (state.localIsLoading) {
-                                    ShimmerLocalEmployeeCard(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(bottom = 20.dp)
-                                    )
-                                } else {
-                                    LazyVerticalGrid(
-                                        columns = GridCells.Fixed(2),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(bottom = 20.dp),
-                                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                        contentPadding = PaddingValues(bottom = 20.dp)
-                                    ){
-                                        //id can be null
-                                        //key for better performance
-                                        items(items = state.localEmployeeResults, key = { result ->
-                                            result.id.value ?: result.email
-                                        }) { employee ->
-                                            EmployeeCard(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                employee = employee,
-                                                onClick = { employee, checked ->
-                                                    onActions(
-                                                        EmployeeHomeActions.NavigateToEditEmployee(
-                                                            employee = employee,
-                                                            checked = checked
-                                                        )
-                                                    )
-                                                },
-                                                onDeleteClick = { employee ->
-                                                    onActions(
-                                                        EmployeeHomeActions.DeleteLocalEmployee(
-                                                            employee = employee
-                                                        )
-                                                    )
-                                                },
-                                                onEditClick = { employee, checked ->
-                                                    onActions(
-                                                        EmployeeHomeActions.NavigateToEditEmployee(
-                                                            employee = employee,
-                                                            checked = checked
-                                                        )
-                                                    )
-                                                    Log.d("MyTag", "hey: $checked")
-                                                })
-
-                                        }
-                                    }
-                                }
-
-                            }
+                        is LoadState.NotLoading -> {
+                            Log.d("MyTag", "appendState: NotLoading")
                         }
                     }
-
-                    LoadState.Loading -> {
-                        //update loader
-                        onActions(EmployeeHomeActions.UpdateLoader(isLoading = true))
-                        //enable button: if error happens handled to disable
-                        onActions(EmployeeHomeActions.EnableButtons(enableButtons = true))
-                    }
-
-                    is LoadState.NotLoading -> onActions(
-                        EmployeeHomeActions.UpdateLoader(
-                            isLoading = false
-                        )
-                    )
                 }
             }
-        }else {
+        } else {
             //to remove scrolling effect in lazyColumn
             CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
                 LazyVerticalGrid(

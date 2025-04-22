@@ -92,6 +92,7 @@ dependencies {
     implementation (libs.androidx.core.splashscreen)
 
 
+
     //Room database
     implementation (libs.androidx.room.runtime)
     //noinspection KaptUsageInsteadOfKsp

@@ -1,5 +1,6 @@
 package com.example.androiddevelopercodechallenge.data.roomDB
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -16,6 +17,12 @@ interface ResultDAO {
     @Query("SELECT * FROM results_table")
     fun getAllResults(): Flow<List<Result>>
 
+//    @Query("SELECT * FROM results_table")
+//    fun getPagingResults(): PagingSource<Int, Result>
+
+    @Query("DELETE FROM results_table")
+    suspend fun deleteAll()
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addResult(result: Result)
 
@@ -26,5 +33,4 @@ interface ResultDAO {
     //will delete depending on email
     @Query("DELETE FROM results_table WHERE email = :email")
     suspend fun deleteResultsByEmail(email: String)
-
 }

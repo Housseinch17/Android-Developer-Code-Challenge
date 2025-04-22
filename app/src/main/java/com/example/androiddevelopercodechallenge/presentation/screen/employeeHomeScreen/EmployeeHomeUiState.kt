@@ -10,13 +10,18 @@ data class EmployeeHomeUiState(
     val employeeList: List<Result> = emptyList<Result>(),
     val filteredEmployeeList: List<Result> = emptyList<Result>(),
     val localEmployeeResults: List<Result> = emptyList<Result>(),
+    val filteredLocalEmployeeResults: List<Result> = emptyList<Result>(),
     val searchQuery: String = "",
     val isLoading: Boolean = true,
-    val showDialog: Boolean = false,
     val showLocalDialog: Boolean = false,
     val localIsLoading: Boolean = false,
     val currentEmployee: Result = Result(),
-    val dialogProgressBar: Boolean = false,
     val localDialogProgressBar: Boolean = false,
     val enableButtons: Boolean = true,
+    val isPagingQuery: Boolean = true,
+)
+
+data class EmployeeHomeDialogState(
+    val showDialog: Boolean = false,
+    val dialogProgressBar: Boolean = false,
 )

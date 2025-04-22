@@ -1,4 +1,4 @@
-package com.example.androiddevelopercodechallenge.domain.useCase
+package com.example.androiddevelopercodechallenge.domain.useCase.employee
 
 import com.example.androiddevelopercodechallenge.data.util.ApiResponse
 

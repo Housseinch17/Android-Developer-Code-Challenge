@@ -53,9 +53,10 @@ fun NavGraphBuilder.employeeNavGraph(
 
             val employeeHomeViewModel = hiltViewModel<EmployeeHomeViewModel>()
             //collectAsStateWithLifecycle
-            //use by instead of = and .value for delegate getValue()
             val employeeUiState by
             employeeHomeViewModel.employeeUiState.collectAsStateWithLifecycle()
+            val employeeDialogState by
+            employeeHomeViewModel.employeeHomeDialogState.collectAsStateWithLifecycle()
 
             LaunchedEffect(employeeHomeViewModel.employeeHomeEvents) {
                 //collectLatest used when we want to cancel the last execution of a task
@@ -89,6 +90,7 @@ fun NavGraphBuilder.employeeNavGraph(
                     .background(color = Background)
                     .padding(horizontal = 12.dp, vertical = 20.dp),
                 state = employeeUiState,
+                dialogState = employeeDialogState,
                 onActions = employeeHomeViewModel::onActions,
             )
         }
