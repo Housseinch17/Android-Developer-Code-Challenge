@@ -1,17 +1,25 @@
 package com.example.androiddevelopercodechallenge.data.model
 
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.example.androiddevelopercodechallenge.presentation.util.Constants
 import kotlinx.serialization.Serializable
 
+@Entity(tableName = "results_table")
 @Serializable
 data class Result(
-    val cell: String = "",
+    @PrimaryKey
     val email: String = "",
-    val gender: String = Constants.gender.first(),
-    val location: Location = Location(),
-    val name: Name = Name(),
+    @Embedded
     val id: Id = Id(),
-    val nat: String = "",
+    @Embedded
+    val name: Name = Name(),
     val phone: String = "",
+    val gender: String = Constants.gender.first(),
+    val cell: String = "",
+    @Embedded
+    val location: Location = Location(),
+    @Embedded
     val picture: Picture = Picture(),
 )

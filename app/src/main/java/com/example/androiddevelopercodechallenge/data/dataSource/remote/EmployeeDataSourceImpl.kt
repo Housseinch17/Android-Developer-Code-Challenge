@@ -1,4 +1,4 @@
-package com.example.androiddevelopercodechallenge.data.dataSource
+package com.example.androiddevelopercodechallenge.data.dataSource.remote
 
 import android.util.Log
 import com.example.androiddevelopercodechallenge.data.api.ApiService
@@ -18,7 +18,7 @@ class EmployeeDataSourceImpl @Inject constructor(
             Log.d("MyTag", "EmployeeDataSourceImpl: getEmployees(): success: $employee")
             return@withContext ApiResponse.Success(employee = employee)
         } catch (e: Exception) {
-            Log.d("MyTag", "EmployeeDataSourceImpl: getEmployees(): error: ${e.message}")
+            Log.e("MyTag", "EmployeeDataSourceImpl: getEmployees(): error: ${e.message}")
             return@withContext ApiResponse.Error(message = e.message.toString())
         }
     }

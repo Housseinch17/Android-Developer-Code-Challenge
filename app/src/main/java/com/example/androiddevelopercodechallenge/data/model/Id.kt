@@ -1,5 +1,6 @@
 package com.example.androiddevelopercodechallenge.data.model
 
+import androidx.room.ColumnInfo
 import kotlinx.serialization.Serializable
 
 @Serializable

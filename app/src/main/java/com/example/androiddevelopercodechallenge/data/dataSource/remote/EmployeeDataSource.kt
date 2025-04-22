@@ -1,4 +1,4 @@
-package com.example.androiddevelopercodechallenge.data.dataSource
+package com.example.androiddevelopercodechallenge.data.dataSource.remote
 
 import com.example.androiddevelopercodechallenge.data.util.ApiResponse
 

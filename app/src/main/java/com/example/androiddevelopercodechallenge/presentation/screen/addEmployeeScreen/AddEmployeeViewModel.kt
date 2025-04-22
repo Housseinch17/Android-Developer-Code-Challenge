@@ -10,6 +10,7 @@ import com.example.androiddevelopercodechallenge.data.util.AddOrEditActions
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditEvents.AddEmployeeEvents
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditUiState.AddEmployeeUiState
 import com.example.androiddevelopercodechallenge.data.util.Country
+import com.example.androiddevelopercodechallenge.domain.useCase.local.LocalUseCase
 import com.example.androiddevelopercodechallenge.presentation.util.Constants.numberRegex
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -26,7 +27,8 @@ import javax.inject.Inject
 class AddEmployeeViewModel @Inject constructor(
     //not recommended to use context in viewmodel
     //but since it's applicationContext can work if really needed
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val localUseCase: LocalUseCase,
 
 ) : ViewModel() {
     private val _addEmployeeUiState: MutableStateFlow<AddEmployeeUiState> =
@@ -73,8 +75,14 @@ class AddEmployeeViewModel @Inject constructor(
             employee.email.isNotBlank() && employee.phone.isNotBlank()
         ) {
             if(Patterns.EMAIL_ADDRESS.matcher(employee.email).matches()) {
-                _addEmployeeEvents.send(AddEmployeeEvents.AddEmployee)
-                resetState()
+                try {
+                    val extension = _addEmployeeUiState.value.selectedCountry.extension
+                    localUseCase.addResult(result = employee.copy(phone = extension+" "+employee.phone))
+                    resetState()
+                    _addEmployeeEvents.send(AddEmployeeEvents.AddEmployee)
+                }catch (e: Exception){
+                    _addEmployeeEvents.send(AddEmployeeEvents.ShowMessage(message = "${e.message}"))
+                }
             }else{
                 val validEmail = context.getString(R.string.please_use_valid_email) +"!"
                 _addEmployeeEvents.send(AddEmployeeEvents.ShowMessage(message = validEmail))

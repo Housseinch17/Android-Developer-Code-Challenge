@@ -37,6 +37,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -265,11 +266,7 @@ fun PagingError(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 20.dp,
-                vertical = 20.dp
-            ),
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
@@ -289,7 +286,8 @@ fun PagingError(
         ) {
             Text(
                 modifier = Modifier,
-                text = stringResource(id)
+                text = stringResource(id),
+                color = Color.White
             )
         }
     }
@@ -361,61 +359,66 @@ fun ProfilePicture(
     }
 }
 
+@Stable
 @Composable
 fun ShowDialog(
     modifier: Modifier,
     title: String,
     isProgressBar: Boolean,
+    showDialog: Boolean,
     description: @Composable () -> Unit,
     confirmText: String,
     confirmButton: () -> Unit,
     onDismissButton: () -> Unit
 ) {
-    AlertDialog(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surface),
-        onDismissRequest = {},
-        confirmButton = {
-            Button(
-                enabled = !isProgressBar,
-                onClick = confirmButton,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Blue
-                )
-            ) {
-                Text(
-                    text = confirmText, color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        },
-        dismissButton = {
-            Button(
-                enabled = !isProgressBar,
-                onClick = onDismissButton,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Label
-                )
-            ) {
-                Text(
-                    stringResource(R.string.dismiss),
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        },
+    if(showDialog){
+        AlertDialog(
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surface),
+            onDismissRequest = {},
+            confirmButton = {
+                Button(
+                    enabled = !isProgressBar,
+                    onClick = confirmButton,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Blue
+                    )
+                ) {
+                    Text(
+                        text = confirmText, color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                Button(
+                    enabled = !isProgressBar,
+                    onClick = onDismissButton,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Label
+                    )
+                ) {
+                    Text(
+                        stringResource(R.string.dismiss),
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
 
-        title = {
-            Text(
-                text = title,
-                style = Typography.titleMedium
-            )
-        },
-        text = {
-            description()
-        })
+            title = {
+                Text(
+                    text = title,
+                    style = Typography.titleMedium
+                )
+            },
+            text = {
+                description()
+            })
+
+    }
 }
 
 fun phoneNumberVisualTransformation(extension: String): VisualTransformation {

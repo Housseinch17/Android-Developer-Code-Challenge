@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,6 +35,7 @@ import com.example.androiddevelopercodechallenge.presentation.screen.employeeHom
 import com.example.androiddevelopercodechallenge.presentation.screen.employeeHomeScreen.EmployeeHomeScreen
 import com.example.androiddevelopercodechallenge.presentation.screen.employeeHomeScreen.EmployeeHomeViewModel
 import com.example.androiddevelopercodechallenge.presentation.theme.Background
+import com.example.androiddevelopercodechallenge.presentation.theme.ComposableBackground
 import com.example.androiddevelopercodechallenge.presentation.util.CustomNavType
 import kotlinx.coroutines.flow.collectLatest
 import kotlin.reflect.typeOf
@@ -142,7 +142,7 @@ fun NavGraphBuilder.employeeNavGraph(
                     .fillMaxSize()
                     //padding for bottom bar
                     .navigationBarsPadding()
-                    .background(color = Color(0xFFF2F3F5))
+                    .background(color = ComposableBackground)
                     .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 12.dp),
                 state = addEmployeeUiState,
                 onActions = addEmployeeViewModel::onActions,
@@ -217,7 +217,7 @@ fun NavGraphBuilder.employeeNavGraph(
                     .fillMaxSize()
                     //padding for bottom bar
                     .navigationBarsPadding()
-                    .background(color = Color(0xFFF2F3F5))
+                    .background(color = ComposableBackground)
                     .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 12.dp),
                 state = editEmployeeUiState,
                 onActions = editEmployeeViewModel::onActions,

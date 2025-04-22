@@ -6,9 +6,11 @@ import androidx.paging.PagingState
 import com.example.androiddevelopercodechallenge.data.model.Result
 import com.example.androiddevelopercodechallenge.data.util.ApiResponse
 import com.example.androiddevelopercodechallenge.domain.useCase.EmployeeUseCase
+import com.example.androiddevelopercodechallenge.domain.useCase.local.LocalUseCase
 
 class EmployeePaging(
     private val employeeUseCase: EmployeeUseCase,
+    private val localUseCase: LocalUseCase,
 ) : PagingSource<Int, Result>() {
 
     override fun getRefreshKey(state: PagingState<Int, Result>): Int? {
@@ -22,6 +24,8 @@ class EmployeePaging(
         Log.d("MyTag", "EmployeePaging: load(): nextPage: $page")
         return try {
             val response = employeeUseCase.getEmployees(page = page) as ApiResponse.Success
+            //insert response(list<Result>) into database
+            localUseCase.insertAllResults(results = response.employee.results)
             LoadResult.Page(
                 data = response.employee.results,
                 prevKey = null,

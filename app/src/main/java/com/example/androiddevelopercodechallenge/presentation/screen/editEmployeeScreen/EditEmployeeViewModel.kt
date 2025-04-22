@@ -11,6 +11,7 @@ import com.example.androiddevelopercodechallenge.data.util.AddOrEditActions
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditEvents.EditEmployeeEvents
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditUiState.EditEmployeeUiState
 import com.example.androiddevelopercodechallenge.data.util.Country
+import com.example.androiddevelopercodechallenge.domain.useCase.local.LocalUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
@@ -25,7 +26,8 @@ import javax.inject.Inject
 @HiltViewModel
 class EditEmployeeViewModel @Inject constructor(    //not recommended to use context in viewmodel
     //but since it's applicationContext can work if really needed
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val localUseCase: LocalUseCase,
 ) : ViewModel() {
     private val _editEmployeeUiState: MutableStateFlow<EditEmployeeUiState> =
         MutableStateFlow(EditEmployeeUiState())
@@ -82,8 +84,14 @@ class EditEmployeeViewModel @Inject constructor(    //not recommended to use con
             employee.email.isNotBlank() && employee.phone.isNotBlank()
         ) {
             if (Patterns.EMAIL_ADDRESS.matcher(employee.email).matches()) {
-                _editEmployeeEvents.send(EditEmployeeEvents.AddEmployee)
-                resetState()
+                try {
+                    val extension = _editEmployeeUiState.value.selectedCountry.extension
+                    localUseCase.updateResult(result = employee.copy(phone = extension+" "+employee.phone))
+                    resetState()
+                    _editEmployeeEvents.send(EditEmployeeEvents.AddEmployee)
+                }catch (e: Exception){
+                    _editEmployeeEvents.send(EditEmployeeEvents.ShowMessage(message = "${e.message}"))
+                }
             } else {
                 val validEmail = context.getString(R.string.please_use_valid_email) + "!"
                 _editEmployeeEvents.send(EditEmployeeEvents.ShowMessage(message = validEmail))

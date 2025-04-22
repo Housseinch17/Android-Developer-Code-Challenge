@@ -88,6 +88,17 @@ dependencies {
     implementation(libs.retrofit2.kotlinx.serialization.converter)
     implementation(libs.okhttp)
 
+    //splashScreen
+    implementation (libs.androidx.core.splashscreen)
+
+
+    //Room database
+    implementation (libs.androidx.room.runtime)
+    //noinspection KaptUsageInsteadOfKsp
+    kapt (libs.androidx.room.compiler)
+    implementation (libs.androidx.room.ktx)
+    //converters for classes inside room database
+    implementation (libs.gson)
 
 
 }
