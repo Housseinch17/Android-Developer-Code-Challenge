@@ -7,7 +7,7 @@ import androidx.paging.Pager
 import androidx.paging.cachedIn
 import androidx.paging.filter
 import com.example.androiddevelopercodechallenge.data.model.Result
-import com.example.androiddevelopercodechallenge.domain.useCase.local.LocalUseCase
+import com.example.androiddevelopercodechallenge.domain.repository.LocalRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -44,13 +44,12 @@ sealed interface EmployeeHomeActions {
     data class DeleteEmployee(val employee: Result) : EmployeeHomeActions
     data class DeleteEmployeeConfirmed(val employee: Result) : EmployeeHomeActions
     data object HideDialog : EmployeeHomeActions
-    data class EnableButtons(val enableButtons: Boolean) : EmployeeHomeActions
 }
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class EmployeeHomeViewModel @Inject constructor(
-    private val localUseCase: LocalUseCase,
+    private val localRepository: LocalRepository,
     pager: Pager<Int, Result>,
 ) : ViewModel() {
     private val _employeeHomeUiState: MutableStateFlow<EmployeeHomeUiState> = MutableStateFlow(
@@ -78,7 +77,7 @@ class EmployeeHomeViewModel @Inject constructor(
     val employeePagingFlow = pager.flow.cachedIn(viewModelScope)
 
     val filteredEmployeePagingFlow = _employeeHomeUiState
-        .map { it.searchQuery } // react to changes in searchQuery
+        .map { it.searchQuery }
         .debounce(300L)
         .distinctUntilChanged()
         .flatMapLatest { query ->
@@ -119,7 +118,6 @@ class EmployeeHomeViewModel @Inject constructor(
 
                 is EmployeeHomeActions.DeleteEmployeeConfirmed -> deleteEmployeeConfirmed(employee = employeeHomeActions.employee)
                 EmployeeHomeActions.HideDialog -> hideDialog()
-                is EmployeeHomeActions.EnableButtons -> enableButtons(enableButtons = employeeHomeActions.enableButtons)
 
             }
         }
@@ -127,8 +125,8 @@ class EmployeeHomeViewModel @Inject constructor(
 
     private suspend fun readFromLocalDb() {
         try {
-            localUseCase.getAllResults().collect { newList ->
-                Log.d("MyTag", "EmployeeHomeViewModel: readFromLocalDb: success: ${newList.size}")
+            localRepository.getAllResults().collect { newList ->
+//                Log.d("MyTag", "EmployeeHomeViewModel: readFromLocalDb: success: ${newList.size}")
                 _employeeHomeUiState.update { newState ->
                     newState.copy(
                         employeeResult = newList,
@@ -138,14 +136,7 @@ class EmployeeHomeViewModel @Inject constructor(
                 filterEmployeeList(query = _employeeHomeUiState.value.searchQuery)
             }
         } catch (e: Exception) {
-            Log.d("MyTag", "EmployeeHomeViewModel: readFromLocalDb: error: ${e.message}")
-        }
-    }
-
-    private fun enableButtons(enableButtons: Boolean) {
-        Log.d("MyTag", "EmployeeHomeViewModel enabledButtons()")
-        _employeeHomeUiState.update { newState ->
-            newState.copy(enableButtons = enableButtons)
+            Log.e("MyTag", "EmployeeHomeViewModel: readFromLocalDb: error: ${e.message}")
         }
     }
 
@@ -191,11 +182,11 @@ class EmployeeHomeViewModel @Inject constructor(
     }
 
     private suspend fun deleteEmployeeConfirmed(employee: Result) {
-        Log.d("MyTag", "deleteEmployeeConfirmed: $employee")
+//        Log.d("MyTag", "deleteEmployeeConfirmed: $employee")
         showDialogProgressBar()
 
         //delete from db
-        localUseCase.deleteResultsByEmail(email = employee.email)
+        localRepository.deleteResultsByEmail(email = employee.email)
 
         delay(500)
 
@@ -205,7 +196,7 @@ class EmployeeHomeViewModel @Inject constructor(
     }
 
     private fun deleteEmployee(employee: Result) {
-        Log.d("MyTag", "employee: $employee now")
+//        Log.d("MyTag", "deleteEmployee() employee: $employee")
         _employeeHomeUiState.update { newState ->
             newState.copy(currentEmployee = employee)
         }

@@ -198,7 +198,6 @@ fun EmployeeContent(
                     .fillMaxWidth()
                     .padding(bottom = 12.dp),
                 searchQuery = state.searchQuery,
-                enableButton = state.enableButtons,
                 onQueryChange = { newQuery ->
                     onActions(EmployeeHomeActions.OnSearchQueryChanged(newQuery = newQuery))
                 }
@@ -219,7 +218,7 @@ fun EmployeeContent(
             }
 
             LoadState.Loading -> {
-                onActions(EmployeeHomeActions.UpdateLoader(isLoading = true))
+                onActions(EmployeeHomeActions.UpdateLoader(true))
             }
 
             is LoadState.NotLoading -> {
@@ -493,7 +492,7 @@ fun EmployeeCard(
                             .height(60.dp)
                             .fillMaxWidth(),
                         imageUrl = employee.picture.thumbnail,
-                        contentScale = ContentScale.FillBounds
+                        contentScale = ContentScale.Crop,
                     )
 
                     Column(
@@ -526,7 +525,7 @@ fun EmployeeCard(
 
                         Text(
                             modifier = Modifier,
-                            text = stringResource(R.string.id) + ": ${employee.id.value}",
+                            text = stringResource(R.string.phone) + ": ${employee.phone}",
                             style = Typography.labelSmall,
                             maxLines = 1,
                             textAlign = TextAlign.Center
@@ -613,7 +612,6 @@ fun ShimmerSearchView() {
 fun SearchView(
     modifier: Modifier,
     searchQuery: String,
-    enableButton: Boolean,
     onQueryChange: (String) -> Unit
 ) {
     //keyboard controller to show or hide keyboard
@@ -644,7 +642,6 @@ fun SearchView(
         textStyle = Typography.bodyMedium,
         maxLines = 1,
         value = searchQuery,
-        enabled = enableButton,
         onValueChange = onQueryChange,
         shape = RoundedCornerShape(25.dp),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),

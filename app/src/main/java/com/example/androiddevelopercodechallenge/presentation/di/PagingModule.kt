@@ -7,8 +7,8 @@ import com.example.androiddevelopercodechallenge.data.model.Result
 import com.example.androiddevelopercodechallenge.data.paging.EmployeeRemoteMediator
 import com.example.androiddevelopercodechallenge.data.roomDB.ResultDAO
 import com.example.androiddevelopercodechallenge.data.roomDB.ResultDataBase
-import com.example.androiddevelopercodechallenge.domain.useCase.employee.EmployeeUseCase
-import com.example.androiddevelopercodechallenge.domain.useCase.local.LocalUseCase
+import com.example.androiddevelopercodechallenge.domain.repository.EmployeeRepository
+import com.example.androiddevelopercodechallenge.domain.repository.LocalRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,8 +24,8 @@ object PagingModule {
     @Provides
     @Singleton
     fun providePager(
-        employeeUseCase: EmployeeUseCase,
-        localUseCase: LocalUseCase,
+        employeeRepository: EmployeeRepository,
+        localRepository: LocalRepository,
         database: ResultDataBase,
         resultDAO: ResultDAO,
     ): Pager<Int, Result> {
@@ -35,8 +35,8 @@ object PagingModule {
                 enablePlaceholders = false
             ),
             remoteMediator = EmployeeRemoteMediator(
-                employeeUseCase = employeeUseCase,
-                localUseCase = localUseCase,
+                employeeRepository = employeeRepository,
+                localRepository = localRepository,
                 database = database
             ),
             pagingSourceFactory = {

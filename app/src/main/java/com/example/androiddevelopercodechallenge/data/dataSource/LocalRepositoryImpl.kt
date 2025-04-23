@@ -37,4 +37,8 @@ class LocalRepositoryImpl @Inject constructor(
     override suspend fun deleteAll() {
         localDataSource.deleteAll()
     }
+
+    override suspend fun getResultsCount(): Int {
+        return localDataSource.getResultsCount()
+    }
 }

@@ -19,6 +19,9 @@ interface ResultDAO {
     @Query("SELECT * FROM results_table")
     fun getPagingResults(): PagingSource<Int, Result>
 
+    @Query("SELECT COUNT(*) FROM results_table")
+    suspend fun getResultsCount(): Int
+
     @Query("SELECT * FROM results_table")
     fun getAllResults(): Flow<List<Result>>
 

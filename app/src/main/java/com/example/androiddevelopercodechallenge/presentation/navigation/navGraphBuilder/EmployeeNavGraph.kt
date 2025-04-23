@@ -17,10 +17,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import androidx.navigation.toRoute
 import com.example.androiddevelopercodechallenge.R
 import com.example.androiddevelopercodechallenge.data.model.Result
-import com.example.androiddevelopercodechallenge.data.util.AddOrEditActions
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditEvents.AddEmployeeEvents
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditEvents.EditEmployeeEvents
 import com.example.androiddevelopercodechallenge.presentation.navigation.Screen
@@ -72,11 +70,14 @@ fun NavGraphBuilder.employeeNavGraph(
                         )
 
                         is EmployeeHomeEvents.DeleteEmployeeConfirmed -> {
+                            val message = context.getString(
+                                R.string.employee_has_been_deleted,
+                                event.deletedEmployee.name.first,
+                                event.deletedEmployee.name.last
+                            )
                             Toast.makeText(
                                 context,
-                                event.deletedEmployee.name.first + " " + event.deletedEmployee.name.last + " " + context.getString(
-                                    R.string.has_been_deleted
-                                ) + "!",
+                                message,
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -107,18 +108,19 @@ fun NavGraphBuilder.employeeNavGraph(
                 addEmployeeViewModel.addEmployeeEvents.collectLatest { events ->
                     when (events) {
                         AddEmployeeEvents.AddEmployee -> {
+                            val message = context.getString(
+                                R.string.employee_added_message,
+                                addEmployeeUiState.employee.name.first,
+                                addEmployeeUiState.employee.name.last
+                            )
                             //extension number not added in phone textField
                             //update it when saving object
                             Toast.makeText(
                                 context,
-                                "${addEmployeeUiState.employee.name.first} ${addEmployeeUiState.employee.name.last} ${
-                                    context.getString(
-                                        R.string.successfully_added
-                                    )
-                                }!",
+                                message,
                                 Toast.LENGTH_SHORT
                             ).show()
-
+                            
                             Log.d(
                                 "MyTag",
                                 "here: ${addEmployeeUiState.employee.copy(phone = addEmployeeUiState.selectedCountry.extension + " " + addEmployeeUiState.employee.phone)}"
@@ -158,25 +160,11 @@ fun NavGraphBuilder.employeeNavGraph(
                 typeOf<Result>() to CustomNavType.employee
             )
         ) { entry ->
-
-            val args = entry.toRoute<EditEmployeeScreen>()
-
             val editEmployeeViewModel = hiltViewModel<EditEmployeeViewModel>()
             val editEmployeeUiState by
             editEmployeeViewModel.editEmployeeUiState.collectAsStateWithLifecycle()
 
-
             val context = LocalContext.current
-
-            LaunchedEffect(Unit) {
-                Log.d("MyTag", "args: ${args.employee}")
-                editEmployeeViewModel.onActions(
-                    AddOrEditActions.EditEmployeeActions.UpdateEmployee(
-                        employee = args.employee,
-                        checked = args.checked
-                    )
-                )
-            }
 
             LaunchedEffect(editEmployeeViewModel.editEmployeeEvents) {
                 editEmployeeViewModel.editEmployeeEvents.collectLatest { events ->

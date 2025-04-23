@@ -3,21 +3,8 @@ import com.example.androiddevelopercodechallenge.R
 import com.example.androiddevelopercodechallenge.data.util.Country
 
 object Constants {
-
-    //static results
-    //usually fetched from api but here we use it as constant
-    const val RESULTS = 20
-
-    const val SEED = "42c617e1aef82488"
-
-    const val VERSION = "1.4"
-
     val gender = listOf<String>("male", "female")
 
-    val numberRegex = Regex("^\\d+$")
-
-    //if list is small it will show below dropDownMenu
-    //if list is big it will show above dropDownMenu
     val countryList: Map<String, Country> = mapOf(
         "Lebanon" to Country(countryFlag = R.drawable.lebanon, extension = "+961"),
         "France" to Country(countryFlag = R.drawable.france, extension = "+33"),

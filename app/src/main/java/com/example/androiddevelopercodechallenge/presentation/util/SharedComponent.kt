@@ -351,7 +351,7 @@ fun ProfilePicture(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(imageUrl).crossfade(true)
                 .placeholder(R.drawable.loading)
-                .error(R.drawable.connectionerror)
+                .error(R.drawable.profile)
                 .build(),
             contentDescription = null,
             contentScale = contentScale,

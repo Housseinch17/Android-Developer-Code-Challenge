@@ -47,7 +47,6 @@ fun Navigation(
                 animationSpec = tween(700, easing = EaseIn)
             )
         },
-
     )
     {
         employeeNavGraph(navHostController = navHostController)

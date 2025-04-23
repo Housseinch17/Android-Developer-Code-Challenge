@@ -1,19 +1,15 @@
 package com.example.androiddevelopercodechallenge.presentation.screen.addEmployeeScreen
 
-import android.content.Context
 import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.androiddevelopercodechallenge.R
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditActions
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditEvents.AddEmployeeEvents
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditUiState.AddEmployeeUiState
 import com.example.androiddevelopercodechallenge.data.util.Country
-import com.example.androiddevelopercodechallenge.domain.useCase.local.LocalUseCase
-import com.example.androiddevelopercodechallenge.presentation.util.Constants.numberRegex
+import com.example.androiddevelopercodechallenge.domain.repository.LocalRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,11 +21,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddEmployeeViewModel @Inject constructor(
-    //not recommended to use context in viewmodel
-    //but since it's applicationContext can work if really needed
-    @ApplicationContext private val context: Context,
-    private val localUseCase: LocalUseCase,
-
+    private val localRepository: LocalRepository,
 ) : ViewModel() {
     private val _addEmployeeUiState: MutableStateFlow<AddEmployeeUiState> =
         MutableStateFlow(AddEmployeeUiState())
@@ -70,27 +62,24 @@ class AddEmployeeViewModel @Inject constructor(
     private suspend fun addEmployee() {
         val state = _addEmployeeUiState.value
         val employee = state.employee
-        Log.d("MyTag","$employee")
+//        Log.d("MyTag", "$employee")
         if (employee.name.first.isNotBlank() && employee.name.last.isNotBlank() &&
             employee.email.isNotBlank() && employee.phone.isNotBlank()
         ) {
-            if(Patterns.EMAIL_ADDRESS.matcher(employee.email).matches()) {
+            if (Patterns.EMAIL_ADDRESS.matcher(employee.email).matches()) {
                 try {
                     val extension = _addEmployeeUiState.value.selectedCountry.extension
-                    localUseCase.addResult(result = employee.copy(phone = extension+" "+employee.phone))
+                    localRepository.addResult(result = employee.copy(phone = extension + " " + employee.phone))
                     resetState()
                     _addEmployeeEvents.send(AddEmployeeEvents.AddEmployee)
-                }catch (e: Exception){
+                } catch (e: Exception) {
                     _addEmployeeEvents.send(AddEmployeeEvents.ShowMessage(message = "${e.message}"))
                 }
-            }else{
-                val validEmail = context.getString(R.string.please_use_valid_email) +"!"
-                _addEmployeeEvents.send(AddEmployeeEvents.ShowMessage(message = validEmail))
+            } else {
+                _addEmployeeEvents.send(AddEmployeeEvents.ShowMessage(message = "Please use valid email!"))
             }
         } else {
-            val requiredFields =
-                context.getString(R.string.required_fields) + " " + context.getString(R.string.are_empty) + "!"
-            _addEmployeeEvents.send(AddEmployeeEvents.ShowMessage(message = requiredFields))
+            _addEmployeeEvents.send(AddEmployeeEvents.ShowMessage(message = "Required fields are empty!"))
         }
     }
 
@@ -125,7 +114,7 @@ class AddEmployeeViewModel @Inject constructor(
     }
 
     private fun updatePhoneNumber(phoneNumber: String) {
-        if (phoneNumber.isEmpty() || phoneNumber.matches(numberRegex)) {
+        if (phoneNumber.isEmpty() || phoneNumber.all { it.isDigit() }) {
             _addEmployeeUiState.update { newState ->
                 newState.copy(employee = newState.employee.copy(phone = phoneNumber))
             }
@@ -146,7 +135,7 @@ class AddEmployeeViewModel @Inject constructor(
         }
     }
 
-    private fun resetState(){
+    private fun resetState() {
         _addEmployeeUiState.value = AddEmployeeUiState()
     }
 }

@@ -2,7 +2,9 @@ package com.example.androiddevelopercodechallenge.data.dataSource.remote
 
 import android.util.Log
 import com.example.androiddevelopercodechallenge.data.api.ApiService
+import com.example.androiddevelopercodechallenge.data.model.Employee
 import com.example.androiddevelopercodechallenge.data.util.ApiResponse
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -12,12 +14,15 @@ class EmployeeDataSourceImpl @Inject constructor(
     private val apiService: ApiService,
     @Named("Dispatchers_IO") private val coroutineDispatcher: CoroutineDispatcher
 ) : EmployeeDataSource {
-    override suspend fun getEmployees(page: Int): ApiResponse = withContext(coroutineDispatcher) {
+    override suspend fun getEmployees(page: Int): ApiResponse<Employee> = withContext(coroutineDispatcher) {
         try {
             val employee = apiService.getEmployees(page = page)
             Log.d("MyTag", "EmployeeDataSourceImpl: getEmployees(): success: $employee")
-            return@withContext ApiResponse.Success(employee = employee)
+            return@withContext ApiResponse.Success(data = employee)
         } catch (e: Exception) {
+            if(e is CancellationException){
+                throw e
+            }
             Log.e("MyTag", "EmployeeDataSourceImpl: getEmployees(): error: ${e.message}")
             return@withContext ApiResponse.Error(message = e.message.toString())
         }

@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.androiddevelopercodechallenge.presentation.screen.MainScreen
+import com.example.androiddevelopercodechallenge.presentation.navigation.NavRoot
 import com.example.androiddevelopercodechallenge.presentation.theme.AndroidDeveloperCodeChallengeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
                 navController = rememberNavController()
                 navController.restoreState(restoreState)
 
-                MainScreen(navHostController = navController)
+                NavRoot(navHostController = navController)
 
             }
         }

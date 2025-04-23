@@ -27,7 +27,6 @@ object NetworkModule {
         .readTimeout(30, TimeUnit.SECONDS)
         .build()
 
-
     val json = Json {
         ignoreUnknownKeys = true
         isLenient = true

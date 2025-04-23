@@ -28,6 +28,16 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            buildConfigField("int", "RESULTS", "20")
+            buildConfigField("String", "SEED", "\"42c617e1aef82488\"")
+            buildConfigField("String", "VERSION", "\"1.4\"")
+
+        }
+        debug {
+            buildConfigField("int", "RESULTS", "20")
+            buildConfigField("String", "SEED", "\"42c617e1aef82488\"")
+            buildConfigField("String", "VERSION", "\"1.4\"")
         }
     }
     compileOptions {
@@ -39,6 +49,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

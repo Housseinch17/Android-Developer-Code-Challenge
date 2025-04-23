@@ -1,9 +1,7 @@
 package com.example.androiddevelopercodechallenge.data.api
 
+import com.example.androiddevelopercodechallenge.BuildConfig
 import com.example.androiddevelopercodechallenge.data.model.Employee
-import com.example.androiddevelopercodechallenge.presentation.util.Constants.RESULTS
-import com.example.androiddevelopercodechallenge.presentation.util.Constants.SEED
-import com.example.androiddevelopercodechallenge.presentation.util.Constants.VERSION
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -11,8 +9,8 @@ interface ApiService {
     @GET("api/")
     suspend fun getEmployees(
         @Query("page") page: Int,
-        @Query("results") results: Int = RESULTS,
-        @Query("seed") seed: String = SEED,
-        @Query("version") version: String = VERSION
+        @Query("results") results: Int = BuildConfig.RESULTS,
+        @Query("seed") seed: String = BuildConfig.SEED,
+        @Query("version") version: String = BuildConfig.VERSION
     ): Employee
 }

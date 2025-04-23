@@ -12,8 +12,6 @@ data class EmployeeHomeUiState(
     val searchQuery: String = "",
     val isLoading: Boolean = true,
     val currentEmployee: Result = Result(),
-    val enableButtons: Boolean = true,
-
 )
 
 data class EmployeeHomeDialogState(

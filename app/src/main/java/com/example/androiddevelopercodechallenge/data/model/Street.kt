@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Street(
     @SerializedName("name")
-    val streetName: String = "",
-    val number: Int = 0
+    val streetName: String = "Beirut, Tayoune",
+    val number: Int = 1242
 )

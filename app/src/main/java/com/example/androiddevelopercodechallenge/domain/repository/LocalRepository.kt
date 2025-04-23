@@ -13,4 +13,5 @@ interface LocalRepository {
     suspend fun updateResult(result: Result)
     suspend fun deleteResultsByEmail(email: String)
     suspend fun deleteAll()
+    suspend fun getResultsCount(): Int
 }

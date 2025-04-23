@@ -22,6 +22,7 @@
     <string name="gender">Gender</string>
     <string name="email">Email</string>
     <string name="phone_number">Phone Number</string>
+    <string name="phone">Phone</string>
     <string name="address">Address</string>
     <string name="typing">Typing</string>
     <string name="personal_information">Personal information</string>
@@ -29,9 +30,10 @@
     <string name="edt">Edit</string>
     <string name="let_us_know...basic_info">Let us get to know you a bit better by sharing your basic info.</string>
     <string name="required_fields">Required fields</string>
-    <string name="are_empty">are empty</string>
     <string name="please_use_valid_email">Please use valid email</string>
-    <string name="has_been_deleted">has been deleted</string>
-    <string name="successfully_added">Successfully added</string>
     <string name="successfully_updated">Successfully updated</string>
+    <string name="employee_added_message">%1$s %2$s successfully added!</string>
+    <string name="employee_has_been_deleted">%1$s %2$s has been deleted!</string>
+
+
 </resources>

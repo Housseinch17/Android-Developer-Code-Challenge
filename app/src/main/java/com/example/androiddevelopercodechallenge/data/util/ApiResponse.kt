@@ -1,8 +1,7 @@
 package com.example.androiddevelopercodechallenge.data.util
 
-import com.example.androiddevelopercodechallenge.data.model.Employee
-
-sealed class ApiResponse {
-    data class Success(val employee: Employee): ApiResponse()
-    data class Error(val message: String): ApiResponse()
+sealed class ApiResponse<out T> {
+    data class Success<out T>(val data: T) : ApiResponse<T>()
+    data class Error(val message: String) : ApiResponse<Nothing>()
+    data object IsLoading : ApiResponse<Nothing>()
 }
