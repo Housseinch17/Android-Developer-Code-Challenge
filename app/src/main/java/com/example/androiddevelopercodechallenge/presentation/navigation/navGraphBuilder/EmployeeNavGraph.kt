@@ -166,7 +166,6 @@ fun NavGraphBuilder.employeeNavGraph(
             editEmployeeViewModel.editEmployeeUiState.collectAsStateWithLifecycle()
 
 
-            Log.d("MyTag","args: ${args.checked}")
             val context = LocalContext.current
 
             LaunchedEffect(Unit) {
@@ -199,7 +198,6 @@ fun NavGraphBuilder.employeeNavGraph(
                                 "MyTag",
                                 "here: ${editEmployeeUiState.employee.copy(phone = editEmployeeUiState.selectedCountry.extension + " " + editEmployeeUiState.employee.phone)}"
                             )
-
                             navHostController.navigateUp()
                         }
 

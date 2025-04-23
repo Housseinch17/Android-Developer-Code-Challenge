@@ -11,5 +11,4 @@ interface ApiService {
         @Query("page") page: Int,
         @Query("results") results: Int = RESULTS,
     ): Employee
-
 }

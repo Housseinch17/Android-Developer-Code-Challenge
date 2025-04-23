@@ -101,6 +101,10 @@ dependencies {
     //converters for classes inside room database
     implementation (libs.gson)
 
+    //paging with room
+    implementation(libs.androidx.room.paging)
+
+
 
 }
 kapt {

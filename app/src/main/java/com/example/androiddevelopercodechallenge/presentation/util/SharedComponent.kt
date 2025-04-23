@@ -65,6 +65,7 @@ import com.example.androiddevelopercodechallenge.presentation.screen.addEmployee
 import com.example.androiddevelopercodechallenge.presentation.screen.addEmployeeScreen.PhoneInputWithCountryCode
 import com.example.androiddevelopercodechallenge.presentation.screen.addEmployeeScreen.TextLabel
 import com.example.androiddevelopercodechallenge.presentation.theme.Label
+import com.example.androiddevelopercodechallenge.presentation.theme.OffWhite
 import com.example.androiddevelopercodechallenge.presentation.theme.Roboto_Bold
 import com.example.androiddevelopercodechallenge.presentation.theme.SearchPlaceholder
 import com.example.androiddevelopercodechallenge.presentation.theme.Tryes
@@ -82,7 +83,7 @@ fun AddOrEditEmployeeScreen(
 ) {
     Scaffold(
         modifier = modifier,
-        containerColor = Color(0xFFF2F3F5),
+        containerColor = OffWhite,
         contentColor = Color.Red,
         bottomBar = {
             Column(

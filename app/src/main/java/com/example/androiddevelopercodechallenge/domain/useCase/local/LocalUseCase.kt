@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface LocalUseCase {
     suspend fun insertAllResults(results: List<Result>)
-//    fun getPagingResults(): PagingSource<Int, Result>
+    fun getPagingResults(): PagingSource<Int, Result>
     suspend fun addResult(result: Result)
     suspend fun updateResult(result: Result)
     suspend fun deleteResultsByEmail(email: String)

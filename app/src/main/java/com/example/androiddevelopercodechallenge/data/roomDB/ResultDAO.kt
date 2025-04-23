@@ -11,14 +11,15 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ResultDAO {
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllResults(results: List<Result>)
 
     @Query("SELECT * FROM results_table")
-    fun getAllResults(): Flow<List<Result>>
+    fun getPagingResults(): PagingSource<Int, Result>
 
-//    @Query("SELECT * FROM results_table")
-//    fun getPagingResults(): PagingSource<Int, Result>
+    @Query("SELECT * FROM results_table")
+    fun getAllResults(): Flow<List<Result>>
 
     @Query("DELETE FROM results_table")
     suspend fun deleteAll()

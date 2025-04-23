@@ -14,9 +14,9 @@ class LocalRepositoryImpl @Inject constructor(
         localDataSource.insertAllResults(results = results)
     }
 
-//    override fun getPagingResults(): PagingSource<Int, Result> {
-//       return localDataSource.getPagingResults()
-//    }
+    override fun getPagingResults(): PagingSource<Int, Result> {
+       return localDataSource.getPagingResults()
+    }
 
     override suspend fun getAllResults(): Flow<List<Result>> {
         return localDataSource.getAllResults()

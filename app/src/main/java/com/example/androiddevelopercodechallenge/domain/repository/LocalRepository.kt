@@ -8,7 +8,7 @@ interface LocalRepository {
     suspend fun insertAllResults(results: List<Result>)
     //live update
     suspend fun getAllResults(): Flow<List<Result>>
-//    fun getPagingResults(): PagingSource<Int, Result>
+    fun getPagingResults(): PagingSource<Int, Result>
     suspend fun addResult(result: Result)
     suspend fun updateResult(result: Result)
     suspend fun deleteResultsByEmail(email: String)

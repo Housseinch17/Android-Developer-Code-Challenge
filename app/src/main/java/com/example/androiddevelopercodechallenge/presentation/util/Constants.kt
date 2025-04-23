@@ -12,9 +12,6 @@ object Constants {
 
     val numberRegex = Regex("^\\d+$")
 
-    val toggleList = listOf("On","Off")
-
-
     //if list is small it will show below dropDownMenu
     //if list is big it will show above dropDownMenu
     val countryList: Map<String, Country> = mapOf(

@@ -7,18 +7,13 @@ import kotlinx.coroutines.flow.emptyFlow
 
 data class EmployeeHomeUiState(
     val employeePagingData: Flow<PagingData<Result>> = emptyFlow(),
-    val employeeList: List<Result> = emptyList<Result>(),
-    val filteredEmployeeList: List<Result> = emptyList<Result>(),
-    val localEmployeeResults: List<Result> = emptyList<Result>(),
-    val filteredLocalEmployeeResults: List<Result> = emptyList<Result>(),
+    val employeeResult: List<Result> = emptyList(),
+    val filteredEmployeeResult: List<Result> = emptyList(),
     val searchQuery: String = "",
     val isLoading: Boolean = true,
-    val showLocalDialog: Boolean = false,
-    val localIsLoading: Boolean = false,
     val currentEmployee: Result = Result(),
-    val localDialogProgressBar: Boolean = false,
     val enableButtons: Boolean = true,
-    val isPagingQuery: Boolean = true,
+
 )
 
 data class EmployeeHomeDialogState(

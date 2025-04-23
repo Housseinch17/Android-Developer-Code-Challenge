@@ -59,8 +59,12 @@ import com.example.androiddevelopercodechallenge.data.util.AddOrEditActions
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditActions.AddEmployeeActions
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditUiState
 import com.example.androiddevelopercodechallenge.data.util.Country
+import com.example.androiddevelopercodechallenge.presentation.theme.AvatarCircle
 import com.example.androiddevelopercodechallenge.presentation.theme.Label
+import com.example.androiddevelopercodechallenge.presentation.theme.LightGray
 import com.example.androiddevelopercodechallenge.presentation.theme.SearchPlaceholder
+import com.example.androiddevelopercodechallenge.presentation.theme.Title
+import com.example.androiddevelopercodechallenge.presentation.theme.Tryes
 import com.example.androiddevelopercodechallenge.presentation.theme.Typography
 import com.example.androiddevelopercodechallenge.presentation.util.AddOrEditEmployeeScreen
 import com.example.androiddevelopercodechallenge.presentation.util.Constants
@@ -194,7 +198,7 @@ fun GenderSelectedDropDown(
             .clip(RoundedCornerShape(8.dp)),
         border = BorderStroke(
             width = 1.dp,
-            color = Color(0xFFE0E0E0)
+            color = LightGray
         ),
         color = Color.White,
         contentColor = Color.Unspecified,
@@ -382,7 +386,7 @@ fun CountrySelectedDropDown(
             .clip(RoundedCornerShape(8.dp)),
         border = BorderStroke(
             width = 1.dp,
-            color = Color(0xFFE0E0E0)
+            color = LightGray
         ),
         color = Color.White,
         contentColor = Color.Unspecified,
@@ -473,12 +477,12 @@ fun AddTextFieldForm(
                 unfocusedContainerColor = Color.White,
                 focusedContainerColor = Color.White,
 
-                unfocusedIndicatorColor = Color(0xFFE0E0E0),
-                focusedIndicatorColor = Color(0xFF0D47A1),
+                unfocusedIndicatorColor = LightGray,
+                focusedIndicatorColor = Tryes,
 
-                unfocusedPlaceholderColor = Color(0xFF9E9E9E),
-                unfocusedTextColor = Color(0xFF212121),
-                focusedTextColor = Color(0xFF212121)
+                unfocusedPlaceholderColor = AvatarCircle,
+                unfocusedTextColor = Title,
+                focusedTextColor = Title
             ),
             //since Next is mostly true use it first in the condition
             keyboardOptions = KeyboardOptions(

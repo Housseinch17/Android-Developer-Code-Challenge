@@ -26,10 +26,10 @@ class LocalDataSourceImpl @Inject constructor(
             }
         }
 
-//    override fun getPagingResults(): PagingSource<Int, Result> {
-//        Log.d("MyTag", "LocalDataSourceImpl: getPagingResults(): called")
-//        return resultDAO.getPagingResults()
-//    }
+    override fun getPagingResults(): PagingSource<Int, Result> {
+        Log.d("MyTag", "LocalDataSourceImpl: getPagingResults(): called")
+        return resultDAO.getPagingResults()
+    }
 
     override suspend fun getAllResults(): Flow<List<Result>> = withContext(coroutineDispatcher) {
         try {
