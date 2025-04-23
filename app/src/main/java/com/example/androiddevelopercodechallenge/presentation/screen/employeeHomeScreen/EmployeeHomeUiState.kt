@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
 data class EmployeeHomeUiState(
-    val employeePagingData: Flow<PagingData<Result>> = emptyFlow(),
+    val filteredEmployeePagingFlow : Flow<PagingData<Result>> = emptyFlow(),
     val employeeResult: List<Result> = emptyList(),
     val filteredEmployeeResult: List<Result> = emptyList(),
     val searchQuery: String = "",

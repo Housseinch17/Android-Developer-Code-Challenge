@@ -36,7 +36,6 @@ sealed interface EmployeeHomeEvents {
 sealed interface EmployeeHomeActions {
     data object NavigateToAddEmployee : EmployeeHomeActions
     data class OnSearchQueryChanged(val newQuery: String) : EmployeeHomeActions
-    data object ClearQuery : EmployeeHomeActions
     data class NavigateToEditEmployee(val employee: Result, val checked: Boolean) :
         EmployeeHomeActions
 
@@ -106,10 +105,6 @@ class EmployeeHomeViewModel @Inject constructor(
                     onSearchQueryChanged(query = employeeHomeActions.newQuery)
                 }
 
-                EmployeeHomeActions.ClearQuery -> {
-//                    clearQuery()
-                }
-
                 is EmployeeHomeActions.NavigateToEditEmployee -> navigateToEditEmployee(
                     employee = employeeHomeActions.employee,
                     checked = employeeHomeActions.checked
@@ -146,16 +141,6 @@ class EmployeeHomeViewModel @Inject constructor(
             Log.d("MyTag", "EmployeeHomeViewModel: readFromLocalDb: error: ${e.message}")
         }
     }
-
-//    private fun updateEmployeeList(newEmployeeList: List<Result>) {
-//        _employeeHomeUiState.update { newState ->
-//            newState.copy(
-//                employeeResult = newEmployeeList,
-//                filteredEmployeeResult = newEmployeeList
-//            )
-//        }
-//        filterEmployeeList(query = _employeeHomeUiState.value.searchQuery)
-//    }
 
     private fun enableButtons(enableButtons: Boolean) {
         Log.d("MyTag", "EmployeeHomeViewModel enabledButtons()")

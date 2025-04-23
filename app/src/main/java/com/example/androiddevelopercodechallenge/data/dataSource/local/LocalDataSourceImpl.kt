@@ -31,8 +31,8 @@ class LocalDataSourceImpl @Inject constructor(
         return resultDAO.getPagingResults()
     }
 
-    override suspend fun getAllResults(): Flow<List<Result>> = withContext(coroutineDispatcher) {
-        try {
+    override fun getAllResults(): Flow<List<Result>> {
+       return try {
             Log.d("MyTag", "LocalDataSourceImpl: getAllResults(): successfully completed")
             resultDAO.getAllResults()
         } catch (e: Exception) {

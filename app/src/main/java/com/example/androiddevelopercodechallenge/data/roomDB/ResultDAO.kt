@@ -6,13 +6,14 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Upsert
 import com.example.androiddevelopercodechallenge.data.model.Result
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ResultDAO {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun insertAllResults(results: List<Result>)
 
     @Query("SELECT * FROM results_table")

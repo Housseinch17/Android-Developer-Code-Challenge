@@ -12,5 +12,5 @@ interface LocalUseCase {
     suspend fun deleteResultsByEmail(email: String)
     suspend fun deleteAll()
     //live update
-    suspend fun getAllResults(): Flow<List<Result>>
+    fun getAllResults(): Flow<List<Result>>
 }

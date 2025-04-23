@@ -23,6 +23,7 @@ class EmployeeRemoteMediator
 
     val maxPage = 10
     var currentPage = 1
+
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, Result>
@@ -39,12 +40,13 @@ class EmployeeRemoteMediator
                 }
 
                 LoadType.APPEND -> {
+                    //lastItem is always most recommended
+                    //but in this example api can return null Result() even if not fetched all
+                    //val lastItem = state.lastItemOrNull()
                     Log.d("EmployeeMediator","APPEND")
 
-                    Log.d("EmployeeMediator","currentPage: $currentPage")
-
                     if (currentPage == maxPage) {
-                        Log.d("EmployeeMediator","yes null")
+                        Log.d("EmployeeMediator","currentPage = maxPage")
                         return MediatorResult.Success(endOfPaginationReached = true)
                     }
                     val nextPage = currentPage

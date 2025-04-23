@@ -1,7 +1,6 @@
 package com.example.androiddevelopercodechallenge.presentation.screen.employeeHomeScreen
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -49,8 +48,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -86,7 +83,6 @@ import com.example.androiddevelopercodechallenge.presentation.util.PagingError
 import com.example.androiddevelopercodechallenge.presentation.util.ProfilePicture
 import com.example.androiddevelopercodechallenge.presentation.util.ShimmerEffect
 import com.example.androiddevelopercodechallenge.presentation.util.ShowDialog
-import kotlinx.coroutines.flow.collectLatest
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -179,12 +175,7 @@ fun EmployeeContent(
     Column(
         modifier = Modifier
     ) {
-        val filteredEmployeePagingFlow =
-            employeeHomeViewModel.filteredEmployeePagingFlow.collectAsLazyPagingItems()
-
-        LaunchedEffect(filteredEmployeePagingFlow.itemSnapshotList.size) {
-            Log.d("MyTag", "employeePaging: ${filteredEmployeePagingFlow.itemCount}")
-        }
+        val filteredEmployeePagingFlow = employeeHomeViewModel.filteredEmployeePagingFlow.collectAsLazyPagingItems()
 
         val loadState = filteredEmployeePagingFlow.loadState
 
@@ -241,19 +232,6 @@ fun EmployeeContent(
         Box(
             modifier = Modifier
         ) {
-//            //fetch new api save it into a list for search query
-//            LaunchedEffect(filteredEmployeePagingFlow.itemSnapshotList) {
-//                //converting employeeItems from state to flow
-//                snapshotFlow {
-//                    filteredEmployeePagingFlow.itemSnapshotList.items
-//                }
-//                    .collectLatest { itemList ->
-//                        if (itemList.isNotEmpty()) {
-//                            onActions(EmployeeHomeActions.UpdateEmployeeList(newEmployeeList = itemList))
-//                        }
-//                    }
-//            }
-
             if (state.searchQuery.isBlank()) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),

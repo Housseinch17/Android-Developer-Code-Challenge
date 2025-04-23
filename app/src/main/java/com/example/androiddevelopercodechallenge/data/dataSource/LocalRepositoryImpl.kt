@@ -18,7 +18,7 @@ class LocalRepositoryImpl @Inject constructor(
        return localDataSource.getPagingResults()
     }
 
-    override suspend fun getAllResults(): Flow<List<Result>> {
+    override fun getAllResults(): Flow<List<Result>> {
         return localDataSource.getAllResults()
     }
 

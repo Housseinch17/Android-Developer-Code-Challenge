@@ -8,6 +8,10 @@ object Constants {
     //usually fetched from api but here we use it as constant
     const val RESULTS = 20
 
+    const val SEED = "42c617e1aef82488"
+
+    const val VERSION = "1.4"
+
     val gender = listOf<String>("male", "female")
 
     val numberRegex = Regex("^\\d+$")
