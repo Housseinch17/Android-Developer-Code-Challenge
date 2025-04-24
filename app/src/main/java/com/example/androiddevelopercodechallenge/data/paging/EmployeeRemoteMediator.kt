@@ -32,7 +32,8 @@ class EmployeeRemoteMediator
         return try {
             val pageToLoad = when (loadType) {
                 LoadType.REFRESH -> {
-                    currentPage
+                    currentPage = 1
+                    1
                 }
                 LoadType.PREPEND -> {
                     return MediatorResult.Success(endOfPaginationReached = true)
@@ -65,7 +66,7 @@ class EmployeeRemoteMediator
                 localRepository.insertAllResults(results)
             }
 
-            val endOfPaginationReached = pageToLoad >= maxPage
+            val endOfPaginationReached = pageToLoad >= maxPage || results.isEmpty()
 
             MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
         } catch (e: Exception) {

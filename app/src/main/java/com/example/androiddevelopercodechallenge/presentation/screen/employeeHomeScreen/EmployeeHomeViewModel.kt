@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -70,29 +71,39 @@ class EmployeeHomeViewModel @Inject constructor(
     init {
         Log.d("MyTag", "EmployeeHomeViewModel: Started")
         viewModelScope.launch {
-            readFromLocalDb()
+            launch {
+                readFromLocalDb()
+            }
+                getEmployee()
         }
     }
 
     val employeePagingFlow = pager.flow.cachedIn(viewModelScope)
 
-    val filteredEmployeePagingFlow = _employeeHomeUiState
-        .map { it.searchQuery }
-        .debounce(300L)
-        .distinctUntilChanged()
-        .flatMapLatest { query ->
-            employeePagingFlow.map { pagingData ->
-                if (query.isBlank()) {
-                    pagingData
-                } else {
-                    pagingData.filter { employee ->
-                        employee.name.first.contains(query, ignoreCase = true) ||
-                                employee.name.last.contains(query, ignoreCase = true)
+    private suspend fun getEmployee(){
+        _employeeHomeUiState
+            .map { it.searchQuery }
+            .debounce(300L)
+            .distinctUntilChanged()
+            .flatMapLatest { query ->
+                employeePagingFlow.map { pagingData ->
+                    if (query.isBlank()) {
+                        pagingData
+                    } else {
+                        pagingData.filter { employee ->
+                            employee.name.first.contains(query, ignoreCase = true) ||
+                                    employee.name.last.contains(query, ignoreCase = true)
+                        }
                     }
                 }
             }
-        }
-        .cachedIn(viewModelScope)
+            .cachedIn(viewModelScope)
+            .collect { filteredFlow ->
+                _employeeHomeUiState.update { it.copy(filteredEmployeePagingFlow = flowOf(filteredFlow)) }
+            }
+    }
+
+
 
 
     fun onActions(employeeHomeActions: EmployeeHomeActions) {
@@ -126,7 +137,7 @@ class EmployeeHomeViewModel @Inject constructor(
     private suspend fun readFromLocalDb() {
         try {
             localRepository.getAllResults().collect { newList ->
-//                Log.d("MyTag", "EmployeeHomeViewModel: readFromLocalDb: success: ${newList.size}")
+                Log.d("MyTag", "EmployeeHomeViewModel: readFromLocalDb: success: ${newList.size}")
                 _employeeHomeUiState.update { newState ->
                     newState.copy(
                         employeeResult = newList,

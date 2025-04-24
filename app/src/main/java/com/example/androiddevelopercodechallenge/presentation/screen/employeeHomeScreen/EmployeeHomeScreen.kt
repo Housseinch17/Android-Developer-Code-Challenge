@@ -1,6 +1,7 @@
 package com.example.androiddevelopercodechallenge.presentation.screen.employeeHomeScreen
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -64,7 +65,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.androiddevelopercodechallenge.R
@@ -92,7 +92,6 @@ fun EmployeeHomeScreen(
     modifier: Modifier = Modifier,
     state: EmployeeHomeUiState,
     dialogState: EmployeeHomeDialogState,
-    employeeHomeViewModel: EmployeeHomeViewModel = hiltViewModel<EmployeeHomeViewModel>(),
     onActions: (EmployeeHomeActions) -> Unit,
 ) {
     Scaffold(
@@ -111,7 +110,6 @@ fun EmployeeHomeScreen(
         ) {
             EmployeeContent(
                 state = state,
-                employeeHomeViewModel = employeeHomeViewModel,
                 onActions = onActions
             )
 
@@ -169,13 +167,14 @@ fun EmployeeHomeScreen(
 @Composable
 fun EmployeeContent(
     state: EmployeeHomeUiState,
-    employeeHomeViewModel: EmployeeHomeViewModel,
     onActions: (EmployeeHomeActions) -> Unit,
 ) {
     Column(
         modifier = Modifier
     ) {
-        val filteredEmployeePagingFlow = employeeHomeViewModel.filteredEmployeePagingFlow.collectAsLazyPagingItems()
+        val filteredEmployeePagingFlow = state.filteredEmployeePagingFlow.collectAsLazyPagingItems()
+
+        Log.d("MyTag","ArticleRemoteMediator: ${filteredEmployeePagingFlow.itemCount}")
 
         val loadState = filteredEmployeePagingFlow.loadState
 
