@@ -203,7 +203,6 @@ class EmployeeHomeViewModel @Inject constructor(
 
         _employeeHomeEvents.send(EmployeeHomeEvents.DeleteEmployeeConfirmed(deletedEmployee = _employeeHomeUiState.value.currentEmployee))
         hideDialog()
-
     }
 
     private fun deleteEmployee(employee: Result) {

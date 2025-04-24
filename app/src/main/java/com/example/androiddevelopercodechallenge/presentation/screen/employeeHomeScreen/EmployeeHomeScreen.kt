@@ -1,7 +1,6 @@
 package com.example.androiddevelopercodechallenge.presentation.screen.employeeHomeScreen
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -157,8 +156,6 @@ fun EmployeeHomeScreen(
                     onActions(EmployeeHomeActions.HideDialog)
                 }
             )
-
-
         }
     }
 }
@@ -173,8 +170,6 @@ fun EmployeeContent(
         modifier = Modifier
     ) {
         val filteredEmployeePagingFlow = state.filteredEmployeePagingFlow.collectAsLazyPagingItems()
-
-        Log.d("MyTag","ArticleRemoteMediator: ${filteredEmployeePagingFlow.itemCount}")
 
         val loadState = filteredEmployeePagingFlow.loadState
 
@@ -244,9 +239,6 @@ fun EmployeeContent(
                     //key for better performance
                     items(
                         count = filteredEmployeePagingFlow.itemCount,
-                        key = { index ->
-                            filteredEmployeePagingFlow[index]?.email ?: "emptyEmail_$index"
-                        }
                     ) { index ->
                         val item = filteredEmployeePagingFlow[index]
                         if (item != null) {

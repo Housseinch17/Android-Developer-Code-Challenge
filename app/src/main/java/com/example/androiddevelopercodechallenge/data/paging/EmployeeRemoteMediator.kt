@@ -21,7 +21,6 @@ class EmployeeRemoteMediator
     private val database: ResultDataBase,
 ) : RemoteMediator<Int, Result>() {
 
-    //load only 10 pages
     val maxPage = 10
     var currentPage = 1
 
@@ -32,13 +31,16 @@ class EmployeeRemoteMediator
         return try {
             val pageToLoad = when (loadType) {
                 LoadType.REFRESH -> {
+                    Log.d("EmployeeMediator","refresh")
                     currentPage = 1
                     1
                 }
                 LoadType.PREPEND -> {
+                    Log.d("EmployeeMediator","prepend")
                     return MediatorResult.Success(endOfPaginationReached = true)
                 }
                 LoadType.APPEND -> {
+                    Log.d("EmployeeMediator","append")
                     if (currentPage > maxPage) {
                         Log.d("EmployeeMediator","currentPage = maxPage $currentPage")
                         return MediatorResult.Success(endOfPaginationReached = true)
@@ -48,11 +50,12 @@ class EmployeeRemoteMediator
                 }
             }
 
+            Log.d("EmployeeMediator","pageToLoad: $pageToLoad")
 
             val response = employeeRepository.getEmployees(page = pageToLoad) as ApiResponse.Success
             val results = response.data.results
 
-
+            Log.d("EmployeeMediator","results: ${results.size}")
             database.withTransaction {
                 if (loadType == LoadType.REFRESH) {
                     localRepository.deleteAll()
@@ -67,6 +70,8 @@ class EmployeeRemoteMediator
             }
 
             val endOfPaginationReached = pageToLoad >= maxPage || results.isEmpty()
+
+            Log.d("EmployeeMediator","endOfPaginationReached: $endOfPaginationReached")
 
             MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
         } catch (e: Exception) {
