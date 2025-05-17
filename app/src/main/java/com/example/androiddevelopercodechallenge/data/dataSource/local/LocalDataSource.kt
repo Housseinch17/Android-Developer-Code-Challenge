@@ -1,17 +1,14 @@
 package com.example.androiddevelopercodechallenge.data.dataSource.local
 
-import androidx.paging.PagingSource
-import com.example.androiddevelopercodechallenge.data.model.Result
+import com.example.androiddevelopercodechallenge.data.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface LocalDataSource {
-    suspend fun insertAllResults(results: List<Result>)
-    //live update
-    fun getAllResults(): Flow<List<Result>>
-    fun getPagingResults(): PagingSource<Int, Result>
-    suspend fun addResult(result: Result)
-    suspend fun updateResult(result: Result)
-    suspend fun deleteResultsByEmail(email: String)
-    suspend fun deleteAll()
-    suspend fun getResultsCount(): Int
+    fun getAllUsers(): Flow<List<User>>
+    suspend fun insertAllUsers(users: List<User>)
+    suspend fun clearAndResetDatabase()
+    suspend fun addUser(user: User)
+    suspend fun updateUser(user: User)
+    suspend fun getUsersCount(): Int
+    suspend fun deleteUsersById(id: Int)
 }

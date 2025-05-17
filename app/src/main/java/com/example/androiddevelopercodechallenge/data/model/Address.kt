@@ -1,12 +1,12 @@
 package com.example.androiddevelopercodechallenge.data.model
 
-import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Location(
-    @Embedded
-    val street: Street = Street(),
+data class Address(
+    val address: String = "",
     val city: String = "",
-    val country: String = "",
+    val postalCode: String = "",
+    val state: String = "",
+    val stateCode: String = ""
 )

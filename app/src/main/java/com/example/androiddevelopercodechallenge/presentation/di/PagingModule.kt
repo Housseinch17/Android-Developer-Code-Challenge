@@ -3,12 +3,12 @@ package com.example.androiddevelopercodechallenge.presentation.di
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import com.example.androiddevelopercodechallenge.data.model.Result
-import com.example.androiddevelopercodechallenge.data.paging.EmployeeRemoteMediator
-import com.example.androiddevelopercodechallenge.data.roomDB.ResultDAO
-import com.example.androiddevelopercodechallenge.data.roomDB.ResultDataBase
-import com.example.androiddevelopercodechallenge.domain.repository.EmployeeRepository
+import com.example.androiddevelopercodechallenge.data.model.User
+import com.example.androiddevelopercodechallenge.data.paging.UsersRemoteMediator
+import com.example.androiddevelopercodechallenge.data.roomDB.UserDaAO
+import com.example.androiddevelopercodechallenge.data.roomDB.UserDataBase
 import com.example.androiddevelopercodechallenge.domain.repository.LocalRepository
+import com.example.androiddevelopercodechallenge.domain.repository.UsersRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,23 +24,23 @@ object PagingModule {
     @Provides
     @Singleton
     fun providePager(
-        employeeRepository: EmployeeRepository,
+        usersRepository: UsersRepository,
         localRepository: LocalRepository,
-        database: ResultDataBase,
-        resultDAO: ResultDAO,
-    ): Pager<Int, Result> {
+        database: UserDataBase,
+        userDaAO: UserDaAO,
+    ): Pager<Int, User> {
         return Pager(
             config = PagingConfig(
-                pageSize = 20, prefetchDistance = 5, initialLoadSize = 20,
+                pageSize = 20, prefetchDistance = 4, initialLoadSize = 20,
                 enablePlaceholders = false
             ),
-            remoteMediator = EmployeeRemoteMediator(
-                employeeRepository = employeeRepository,
+            remoteMediator = UsersRemoteMediator(
+                usersRepository = usersRepository,
                 localRepository = localRepository,
                 database = database
             ),
             pagingSourceFactory = {
-                resultDAO.getPagingResults()
+                userDaAO.getPagingUsers()
             }
         )
     }

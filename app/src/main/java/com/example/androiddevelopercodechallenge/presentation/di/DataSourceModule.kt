@@ -1,21 +1,21 @@
 package com.example.androiddevelopercodechallenge.presentation.di
 
 import com.example.androiddevelopercodechallenge.data.api.ApiService
-import com.example.androiddevelopercodechallenge.data.dataSource.remote.EmployeeDataSource
-import com.example.androiddevelopercodechallenge.data.dataSource.remote.EmployeeDataSourceImpl
-import com.example.androiddevelopercodechallenge.data.dataSource.EmployeeRepositoryImpl
 import com.example.androiddevelopercodechallenge.data.dataSource.LocalRepositoryImpl
+import com.example.androiddevelopercodechallenge.data.dataSource.UsersRepositoryImpl
 import com.example.androiddevelopercodechallenge.data.dataSource.local.LocalDataSource
 import com.example.androiddevelopercodechallenge.data.dataSource.local.LocalDataSourceImpl
-import com.example.androiddevelopercodechallenge.data.roomDB.ResultDAO
-import com.example.androiddevelopercodechallenge.domain.repository.EmployeeRepository
+import com.example.androiddevelopercodechallenge.data.dataSource.remote.UsersDataSource
+import com.example.androiddevelopercodechallenge.data.dataSource.remote.UsersDataSourceImpl
+import com.example.androiddevelopercodechallenge.data.roomDB.UserDaAO
 import com.example.androiddevelopercodechallenge.domain.repository.LocalRepository
+import com.example.androiddevelopercodechallenge.domain.repository.UsersRepository
+import com.example.androiddevelopercodechallenge.presentation.di.AppModule.IoDispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -26,11 +26,11 @@ object DataSourceModule {
     //single instance created across application
     @Singleton
     @Provides
-    fun provideEmployeeDataSource(
-        @Named("Dispatchers_IO") coroutineDispatcher: CoroutineDispatcher,
+    fun provideUsersDataSource(
+        @IoDispatcher  coroutineDispatcher: CoroutineDispatcher,
         apiService: ApiService
-    ): EmployeeDataSource {
-        return EmployeeDataSourceImpl(
+    ): UsersDataSource {
+        return UsersDataSourceImpl(
             apiService = apiService,
             coroutineDispatcher = coroutineDispatcher
         )
@@ -38,23 +38,23 @@ object DataSourceModule {
 
     @Singleton
     @Provides
-    fun provideEmployeeRepository(
-        employeeDataSource: EmployeeDataSource
-    ): EmployeeRepository {
-        return EmployeeRepositoryImpl(
-            employeeDataSource = employeeDataSource
+    fun provideUserRepository(
+        usersDataSource: UsersDataSource
+    ): UsersRepository {
+        return UsersRepositoryImpl(
+            usersDataSource = usersDataSource
         )
     }
 
     @Singleton
     @Provides
     fun provideLocalDataSource(
-        @Named("Dispatchers_IO") coroutineDispatcher: CoroutineDispatcher,
-        resultDAO: ResultDAO,
+        @IoDispatcher  coroutineDispatcher: CoroutineDispatcher,
+        userDaAO: UserDaAO,
     ): LocalDataSource {
         return LocalDataSourceImpl(
             coroutineDispatcher = coroutineDispatcher,
-            resultDAO = resultDAO
+            userDaAO = userDaAO
         )
     }
 

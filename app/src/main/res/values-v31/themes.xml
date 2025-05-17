@@ -3,7 +3,7 @@
 
     <style name="Theme.AndroidDeveloperCodeChallenge" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowSplashScreenBackground" >@color/splashScreenBackground</item>
-        <item name="android:windowBackground">@drawable/employee</item>
+        <item name="android:windowBackground">@drawable/user</item>
 
     </style>
 

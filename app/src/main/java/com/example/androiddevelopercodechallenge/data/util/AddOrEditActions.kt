@@ -1,23 +1,23 @@
 package com.example.androiddevelopercodechallenge.data.util
 
-import com.example.androiddevelopercodechallenge.data.model.Result
+import com.example.androiddevelopercodechallenge.data.model.User
 
 sealed interface AddOrEditActions {
 
-    data class UpdateFirstName(val firstName: String) : AddEmployeeActions
-    data class UpdateLastName(val lastName: String) : AddEmployeeActions
-    data class UpdateEmail(val email: String) : AddEmployeeActions
-    data class UpdatePhoneNumber(val phoneNumber: String) : AddEmployeeActions
-    data object OnCountryExpand : AddEmployeeActions
-    data class UpdateSelectedCountry(val country: Country) : AddEmployeeActions
-    data object OnGenderExpand : AddEmployeeActions
-    data class UpdateSelectedGender(val gender: String) : AddEmployeeActions
-    data object AddOrSaveEmployee : AddEmployeeActions
+    data class UpdateFirstName(val firstName: String) : AddUserActions
+    data class UpdateLastName(val lastName: String) : AddUserActions
+    data class UpdateEmail(val email: String) : AddUserActions
+    data class UpdatePhoneNumber(val phoneNumber: String) : AddUserActions
+    data object OnCountryExpand : AddUserActions
+    data class UpdateSelectedCountry(val country: Country) : AddUserActions
+    data object OnGenderExpand : AddUserActions
+    data class UpdateSelectedGender(val gender: String) : AddUserActions
+    data object AddOrSaveUser : AddUserActions
 
-    sealed interface AddEmployeeActions: AddOrEditActions
+    sealed interface AddUserActions: AddOrEditActions
 
-    sealed interface EditEmployeeActions: AddOrEditActions {
-        data class OnCheck(val checked: Boolean): EditEmployeeActions
-        data class UpdateEmployee(val employee: Result, val checked: Boolean):  EditEmployeeActions
+    sealed interface EditUserActions: AddOrEditActions {
+        data class OnCheck(val checked: Boolean): EditUserActions
+        data class UpdateUser(val user: User, val checked: Boolean):  EditUserActions
     }
 }

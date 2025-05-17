@@ -2,8 +2,8 @@ package com.example.androiddevelopercodechallenge.presentation.di
 
 import android.app.Application
 import androidx.room.Room
-import com.example.androiddevelopercodechallenge.data.roomDB.ResultDAO
-import com.example.androiddevelopercodechallenge.data.roomDB.ResultDataBase
+import com.example.androiddevelopercodechallenge.data.roomDB.UserDaAO
+import com.example.androiddevelopercodechallenge.data.roomDB.UserDataBase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,14 +16,14 @@ object RoomDataBaseModule {
 
     @Singleton
     @Provides
-    fun provideResultDataBase(app: Application): ResultDataBase {
-        return Room.databaseBuilder(app, ResultDataBase::class.java, "CodeChallenge")
+    fun provideUserDataBase(app: Application): UserDataBase {
+        return Room.databaseBuilder(app, UserDataBase::class.java, "CodeChallenge")
             .build()
     }
 
     @Singleton
     @Provides
-    fun provideResultDAO(resultDataBase: ResultDataBase): ResultDAO {
-        return resultDataBase.resultDAO()
+    fun provideResultDAO(userDataBase: UserDataBase): UserDaAO {
+        return userDataBase.userDAO()
     }
 }

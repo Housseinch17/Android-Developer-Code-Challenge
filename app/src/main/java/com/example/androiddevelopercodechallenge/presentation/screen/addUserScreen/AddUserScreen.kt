@@ -1,6 +1,6 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package com.example.androiddevelopercodechallenge.presentation.screen.addEmployeeScreen
+package com.example.androiddevelopercodechallenge.presentation.screen.addUserScreen
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.androiddevelopercodechallenge.R
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditActions
-import com.example.androiddevelopercodechallenge.data.util.AddOrEditActions.AddEmployeeActions
+import com.example.androiddevelopercodechallenge.data.util.AddOrEditActions.AddUserActions
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditUiState
 import com.example.androiddevelopercodechallenge.data.util.Country
 import com.example.androiddevelopercodechallenge.presentation.theme.AvatarCircle
@@ -66,18 +66,18 @@ import com.example.androiddevelopercodechallenge.presentation.theme.SearchPlaceh
 import com.example.androiddevelopercodechallenge.presentation.theme.Title
 import com.example.androiddevelopercodechallenge.presentation.theme.Tryes
 import com.example.androiddevelopercodechallenge.presentation.theme.Typography
-import com.example.androiddevelopercodechallenge.presentation.util.AddOrEditEmployeeScreen
+import com.example.androiddevelopercodechallenge.presentation.util.AddOrEditUserScreen
 import com.example.androiddevelopercodechallenge.presentation.util.Constants
 import com.example.androiddevelopercodechallenge.presentation.util.phoneNumberVisualTransformation
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AddEmployeeScreen(
+fun AddUserScreen(
     modifier: Modifier,
-    state: AddOrEditUiState.AddEmployeeUiState,
-    onActions: (AddEmployeeActions) -> Unit,
+    state: AddOrEditUiState.AddUserUiState,
+    onActions: (AddUserActions) -> Unit,
 ) {
-    AddOrEditEmployeeScreen(
+    AddOrEditUserScreen(
         modifier = modifier,
         state = state,
         content = {

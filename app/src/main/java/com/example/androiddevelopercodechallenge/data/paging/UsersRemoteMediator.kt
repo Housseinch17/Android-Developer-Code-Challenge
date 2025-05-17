@@ -6,72 +6,79 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import com.example.androiddevelopercodechallenge.data.model.Result
-import com.example.androiddevelopercodechallenge.data.roomDB.ResultDataBase
+import com.example.androiddevelopercodechallenge.data.model.User
+import com.example.androiddevelopercodechallenge.data.roomDB.UserDataBase
 import com.example.androiddevelopercodechallenge.data.util.ApiResponse
-import com.example.androiddevelopercodechallenge.domain.repository.EmployeeRepository
 import com.example.androiddevelopercodechallenge.domain.repository.LocalRepository
+import com.example.androiddevelopercodechallenge.domain.repository.UsersRepository
 import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
-class EmployeeRemoteMediator
-@Inject constructor(
-    private val employeeRepository: EmployeeRepository,
+class UsersRemoteMediator @Inject constructor(
+    private val usersRepository: UsersRepository,
     private val localRepository: LocalRepository,
-    private val database: ResultDataBase,
-) : RemoteMediator<Int, Result>() {
-
-    val maxPage = 10
-    var currentPage = 1
-
+    private val database: UserDataBase,
+) : RemoteMediator<Int, User>() {
+    val limit = 20
+    var currentPage = 0
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, Result>
+        state: PagingState<Int, User>
     ): MediatorResult {
+        //total to reach to end
+        val totalSize = usersRepository.getTotalSize(limit = limit, skip = 0)
         return try {
             val pageToLoad = when (loadType) {
                 LoadType.REFRESH -> {
-                    Log.d("EmployeeMediator","refresh")
-                    currentPage = 1
-                    1
+                    Log.d("UserMediator", "refresh")
+                    currentPage = 0
+                    0
                 }
+
                 LoadType.PREPEND -> {
-                    Log.d("EmployeeMediator","prepend")
+                    Log.d("UserMediator", "prepend")
                     return MediatorResult.Success(endOfPaginationReached = true)
                 }
+
                 LoadType.APPEND -> {
-                    Log.d("EmployeeMediator","append")
-                    if (currentPage > maxPage) {
-                        Log.d("EmployeeMediator","currentPage = maxPage $currentPage")
+                    Log.d("UserMediator", "append")
+                    val lastItem = state.lastItemOrNull()
+                    Log.d("UserMediator","lastItem: $lastItem")
+                    if (currentPage > totalSize) {
+                        Log.d("UserMediator", "totalSize is: $totalSize")
                         return MediatorResult.Success(endOfPaginationReached = true)
                     }
+
                     val nextPage = currentPage
                     nextPage
                 }
             }
 
-            Log.d("EmployeeMediator","pageToLoad: $pageToLoad")
+            Log.d("UserMediator", "pageToLoad: $pageToLoad")
 
-            val response = employeeRepository.getEmployees(page = pageToLoad) as ApiResponse.Success
-            val results = response.data.results
+            val response =
+                usersRepository.getUsers(limit = limit, skip = pageToLoad) as ApiResponse.Success
+            val users = response.data.users
 
-            Log.d("EmployeeMediator","results: ${results.size}")
+            Log.d("UserMediator", "users: ${users.size}")
+
             database.withTransaction {
                 if (loadType == LoadType.REFRESH) {
-                    localRepository.deleteAll()
+                    localRepository.clearAndResetDatabase()
                 }
+
                 //currentPage increment here because when no internet connection
                 //if the user clicks paging.retry() it will increment currentPage without loading data
                 //but here only increment when data loaded and saved in local db
-                currentPage++
+                currentPage += 20
 
                 //insert data into room db
-                localRepository.insertAllResults(results)
+                localRepository.insertAllUsers(users = users)
             }
 
-            val endOfPaginationReached = pageToLoad >= maxPage || results.isEmpty()
+            val endOfPaginationReached = currentPage >= totalSize || users.isEmpty()
 
-            Log.d("EmployeeMediator","endOfPaginationReached: $endOfPaginationReached")
+            Log.d("UserMediator", "endOfPaginationReached: $endOfPaginationReached")
 
             MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
         } catch (e: Exception) {

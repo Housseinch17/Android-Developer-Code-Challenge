@@ -17,7 +17,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://randomuser.me/"
+    private const val BASE_URL = "https://dummyjson.com/"
 
     //slow internet can take time to connect to server or to receive response which leading to error
     val client = OkHttpClient.Builder()

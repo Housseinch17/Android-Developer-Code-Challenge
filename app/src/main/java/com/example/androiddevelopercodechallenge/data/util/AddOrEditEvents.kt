@@ -2,13 +2,13 @@ package com.example.androiddevelopercodechallenge.data.util
 
 sealed interface AddOrEditEvents {
 
-    sealed interface AddEmployeeEvents: AddOrEditEvents {
-        data object AddEmployee : AddEmployeeEvents
-        data class ShowMessage(val message: String) : AddEmployeeEvents
+    sealed interface AddUserEvents: AddOrEditEvents {
+        data object AddUser : AddUserEvents
+        data class ShowMessage(val message: String) : AddUserEvents
     }
 
-    sealed interface EditEmployeeEvents: AddOrEditEvents {
-        data object AddEmployee : EditEmployeeEvents
-        data class ShowMessage(val message: String) : EditEmployeeEvents
+    sealed interface EditUserEvents: AddOrEditEvents {
+        data object AddUser : EditUserEvents
+        data class ShowMessage(val message: String) : EditUserEvents
     }
 }

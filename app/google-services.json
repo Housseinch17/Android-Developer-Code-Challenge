@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "407281874864",
+    "project_id": "android-code-challenge",
+    "storage_bucket": "android-code-challenge.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:407281874864:android:ecde59b7aacdad4cc90875",
+        "android_client_info": {
+          "package_name": "com.example.androiddevelopercodechallenge"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhgGPrl8z2FJtykrheqBZItGeS2PABCwM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

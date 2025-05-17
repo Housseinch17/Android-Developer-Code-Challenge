@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import com.example.androiddevelopercodechallenge.presentation.navigation.navGraphBuilder.employeeNavGraph
+import com.example.androiddevelopercodechallenge.presentation.navigation.navGraphBuilder.userNavGraph
 
 @Composable
 fun NavRoot(
@@ -28,7 +28,7 @@ fun NavRoot(
                 //padding for status bar
                 .padding(top = innerPadding.calculateTopPadding()),
             navController = navHostController,
-            startDestination = Screen.EmployeeNavGraph,
+            startDestination = Screen.UsersNavGraph,
             enterTransition = {
                 slideIntoContainer(
                     AnimatedContentTransitionScope.SlideDirection.Left, // Or Right for the opposite direction
@@ -55,7 +55,7 @@ fun NavRoot(
             },
         )
         {
-            employeeNavGraph(navHostController = navHostController)
+            userNavGraph(navHostController = navHostController)
         }
     }
 }

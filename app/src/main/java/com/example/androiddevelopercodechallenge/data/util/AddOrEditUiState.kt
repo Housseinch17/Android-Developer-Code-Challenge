@@ -1,34 +1,33 @@
 package com.example.androiddevelopercodechallenge.data.util
 
-import com.example.androiddevelopercodechallenge.data.model.Result
+import com.example.androiddevelopercodechallenge.data.model.User
 
 sealed class AddOrEditUiState(
-    open val employee: Result,
+    open val user: User,
     open val selectedCountry: Country,
     open val isCountryExpanded: Boolean,
     open val isGenderExpanded: Boolean,
 ) {
-
-    data class AddEmployeeUiState(
-        override val employee: Result = Result(),
+    data class AddUserUiState(
+        override val user: User = User(),
         override val selectedCountry: Country = Country(),
         override val isCountryExpanded: Boolean = false,
         override val isGenderExpanded: Boolean = false,
     ): AddOrEditUiState(
-        employee = employee,
+        user = user,
         selectedCountry = selectedCountry,
         isCountryExpanded = isCountryExpanded,
         isGenderExpanded = isGenderExpanded
     )
 
-    data class EditEmployeeUiState(
+    data class EditUserUiState(
         val readOnly: Boolean = false,
-        override val employee: Result = Result(),
+        override val user: User = User(),
         override val selectedCountry: Country = Country(),
         override val isCountryExpanded: Boolean = false,
         override val isGenderExpanded: Boolean = false,
     ): AddOrEditUiState(
-        employee = employee,
+        user = user,
         selectedCountry = selectedCountry,
         isCountryExpanded = isCountryExpanded,
         isGenderExpanded = isGenderExpanded

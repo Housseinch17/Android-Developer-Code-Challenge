@@ -1,6 +1,7 @@
-package com.example.androiddevelopercodechallenge.presentation.screen.employeeHomeScreen
+package com.example.androiddevelopercodechallenge.presentation.screen.userHomeScreen
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -30,6 +31,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
@@ -67,7 +69,7 @@ import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.androiddevelopercodechallenge.R
-import com.example.androiddevelopercodechallenge.data.model.Result
+import com.example.androiddevelopercodechallenge.data.model.User
 import com.example.androiddevelopercodechallenge.presentation.theme.AvatarCircle
 import com.example.androiddevelopercodechallenge.presentation.theme.Body
 import com.example.androiddevelopercodechallenge.presentation.theme.CardBackground
@@ -83,15 +85,14 @@ import com.example.androiddevelopercodechallenge.presentation.util.ProfilePictur
 import com.example.androiddevelopercodechallenge.presentation.util.ShimmerEffect
 import com.example.androiddevelopercodechallenge.presentation.util.ShowDialog
 
-
 @OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun EmployeeHomeScreen(
+fun UserHomeScreen(
     modifier: Modifier = Modifier,
-    state: EmployeeHomeUiState,
-    dialogState: EmployeeHomeDialogState,
-    onActions: (EmployeeHomeActions) -> Unit,
+    state: UserHomeUiState,
+    dialogState: UserHomeDialogState,
+    onActions: (UserHomeActions) -> Unit,
 ) {
     Scaffold(
         floatingActionButton = {
@@ -99,7 +100,7 @@ fun EmployeeHomeScreen(
                 ShimmerFloatingButton()
             } else {
                 FloatingButtonComposable(
-                    onClick = { onActions(EmployeeHomeActions.NavigateToAddEmployee) }
+                    onClick = { onActions(UserHomeActions.NavigateToAddUser) }
                 )
             }
         }
@@ -107,14 +108,14 @@ fun EmployeeHomeScreen(
         Box(
             modifier = modifier
         ) {
-            EmployeeContent(
+            UserContent(
                 state = state,
                 onActions = onActions
             )
 
             ShowDialog(
                 modifier = Modifier,
-                title = stringResource(R.string.delete_employee),
+                title = stringResource(R.string.delete_user),
                 isProgressBar = dialogState.dialogProgressBar,
                 showDialog = dialogState.showDialog,
                 description = {
@@ -141,7 +142,7 @@ fun EmployeeHomeScreen(
                                         color = Color.Red,
                                     )
                                 ) {
-                                    append("${state.currentEmployee.name.first} ${state.currentEmployee.name.last}")
+                                    append("${state.currentUser.firstName} ${state.currentUser.lastName}")
                                 }
                                 append("?")
                             }
@@ -150,10 +151,10 @@ fun EmployeeHomeScreen(
                 },
                 confirmText = stringResource(R.string.delete),
                 confirmButton = {
-                    onActions(EmployeeHomeActions.DeleteEmployeeConfirmed(employee = state.currentEmployee))
+                    onActions(UserHomeActions.DeleteUserConfirmed(user = state.currentUser))
                 },
                 onDismissButton = {
-                    onActions(EmployeeHomeActions.HideDialog)
+                    onActions(UserHomeActions.HideDialog)
                 }
             )
         }
@@ -162,23 +163,25 @@ fun EmployeeHomeScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun EmployeeContent(
-    state: EmployeeHomeUiState,
-    onActions: (EmployeeHomeActions) -> Unit,
+fun UserContent(
+    state: UserHomeUiState,
+    onActions: (UserHomeActions) -> Unit,
 ) {
     Column(
         modifier = Modifier
     ) {
-        val filteredEmployeePagingFlow = state.filteredEmployeePagingFlow.collectAsLazyPagingItems()
+        val filteredUserPagingFlow = state.userPagingFlow.collectAsLazyPagingItems()
 
-        val loadState = filteredEmployeePagingFlow.loadState
+        Log.d("MyTag","filteredUserPagingFlow: ${filteredUserPagingFlow.itemCount}")
+
+        val loadState = filteredUserPagingFlow.loadState
 
         if (state.isLoading) {
             ShimmerSearchView()
             Spacer(modifier = Modifier.height(20.dp))
             repeat(8) {
                 Column(modifier = Modifier) {
-                    ShimmerEmployeeCard(
+                    ShimmerUserCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 20.dp)
@@ -192,39 +195,40 @@ fun EmployeeContent(
                     .fillMaxWidth()
                     .padding(bottom = 12.dp),
                 searchQuery = state.searchQuery,
+                onClear = {
+                    onActions(UserHomeActions.OnQueryClear)
+                },
                 onQueryChange = { newQuery ->
-                    onActions(EmployeeHomeActions.OnSearchQueryChanged(newQuery = newQuery))
+                    onActions(UserHomeActions.OnSearchQueryChanged(newQuery = newQuery))
                 }
             )
             Spacer(modifier = Modifier.height(20.dp))
         }
 
-        when (loadState.refresh) {
-            is LoadState.Error -> {
-                onActions(EmployeeHomeActions.UpdateLoader(isLoading = false))
-                PagingError(
-                    id = R.string.refresh,
-                    onPagingPerform = {
-                        //refresh() creating new paging like fresh start page = 1(initial set)
-                        filteredEmployeePagingFlow.refresh()
-                    },
-                )
-            }
-
-            LoadState.Loading -> {
-                onActions(EmployeeHomeActions.UpdateLoader(true))
-            }
-
-            is LoadState.NotLoading -> {
-                onActions(EmployeeHomeActions.UpdateLoader(isLoading = false))
-            }
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Box(
-            modifier = Modifier
+        Column(
+            modifier = Modifier,
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            when (loadState.refresh) {
+                is LoadState.Error -> {
+                    onActions(UserHomeActions.UpdateLoader(isLoading = false))
+                    PagingError(
+                        id = R.string.refresh,
+                        onPagingPerform = {
+                            //refresh() creating new paging like fresh start page = 1(initial set)
+                            filteredUserPagingFlow.refresh()
+                        },
+                    )
+                }
+
+                LoadState.Loading -> {
+
+                }
+
+                is LoadState.NotLoading -> {
+                    onActions(UserHomeActions.UpdateLoader(isLoading = false))
+                }
+            }
             if (state.searchQuery.isBlank()) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
@@ -235,56 +239,55 @@ fun EmployeeContent(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(bottom = 20.dp)
                 ) {
-                    //id can be null
-                    //key for better performance
                     items(
-                        count = filteredEmployeePagingFlow.itemCount,
+                        filteredUserPagingFlow.itemCount,
                     ) { index ->
-                        val item = filteredEmployeePagingFlow[index]
-                        if (item != null) {
-                            EmployeeCard(
-                                modifier = Modifier.fillMaxWidth(),
-                                employee = item,
-                                onClick = { employee, checked ->
-                                    onActions(
-                                        EmployeeHomeActions.NavigateToEditEmployee(
-                                            employee = employee,
-                                            checked = checked
-                                        )
+                        val user = filteredUserPagingFlow[index]
+                        user?.let {
+                        UserCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            user = user,
+                            onClick = { user, checked ->
+                                onActions(
+                                    UserHomeActions.NavigateToEditUser(
+                                        user = user,
+                                        checked = checked
                                     )
-                                },
-                                onDeleteClick = { employee ->
-                                    onActions(
-                                        EmployeeHomeActions.DeleteEmployee(
-                                            employee = employee
-                                        )
+                                )
+                            },
+                            onDeleteClick = { user ->
+                                onActions(
+                                    UserHomeActions.DeleteUser(
+                                        user = user
                                     )
-                                },
-                                onEditClick = { employee, checked ->
-                                    onActions(
-                                        EmployeeHomeActions.NavigateToEditEmployee(
-                                            employee = employee,
-                                            checked = checked
-                                        )
+                                )
+                            },
+                            onEditClick = { user, checked ->
+                                onActions(
+                                    UserHomeActions.NavigateToEditUser(
+                                        user = user,
+                                        checked = checked
                                     )
-                                })
+                                )
+                            })
                         }
                     }
-
                     when (loadState.append) {
                         is LoadState.Error -> {
+                            onActions(UserHomeActions.UpdateLoadStateAppendError(isShowed = true))
+                            //retry() resume from last page
                             item(span = { GridItemSpan(maxLineSpan) }) {
-                                //retry() resume from last page
                                 PagingError(
                                     id = R.string.retry,
-                                    onPagingPerform = { filteredEmployeePagingFlow.retry() }
+                                    onPagingPerform = { filteredUserPagingFlow.retry() }
                                 )
                             }
                         }
 
                         LoadState.Loading -> {
+                            onActions(UserHomeActions.UpdateLoadStateAppendError(isShowed = false))
                             onActions(
-                                EmployeeHomeActions.UpdateLoader(
+                                UserHomeActions.UpdateLoader(
                                     isLoading = false
                                 )
                             )
@@ -295,15 +298,20 @@ fun EmployeeContent(
                                     Spacer(modifier = Modifier.height(12.dp))
                                 }
                             }
-
                         }
 
                         is LoadState.NotLoading -> {
+                            //check if no internet connection
+
+                            //check if error not showing in LoadState.Error
+                            if(!(state.loadStateAppendError)){
+
+                            }
                         }
                     }
                 }
-            }
-            else {
+
+            } else {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier
@@ -314,30 +322,33 @@ fun EmployeeContent(
                     contentPadding = PaddingValues(bottom = 20.dp)
                 ) {
                     items(
-                        items = state.filteredEmployeeResult,
-                    ) { item ->
-                        EmployeeCard(
+                        items = state.filteredUserResult,
+                        key = { user ->
+                            user.uid
+                        }
+                    ) { user ->
+                        UserCard(
                             modifier = Modifier.fillMaxWidth(),
-                            employee = item,
-                            onClick = { employee, checked ->
+                            user = user,
+                            onClick = { user, checked ->
                                 onActions(
-                                    EmployeeHomeActions.NavigateToEditEmployee(
-                                        employee = employee,
+                                    UserHomeActions.NavigateToEditUser(
+                                        user = user,
                                         checked = checked
                                     )
                                 )
                             },
-                            onDeleteClick = { employee ->
+                            onDeleteClick = { user ->
                                 onActions(
-                                    EmployeeHomeActions.DeleteEmployee(
-                                        employee = employee
+                                    UserHomeActions.DeleteUser(
+                                        user = user
                                     )
                                 )
                             },
-                            onEditClick = { employee, checked ->
+                            onEditClick = { user, checked ->
                                 onActions(
-                                    EmployeeHomeActions.NavigateToEditEmployee(
-                                        employee = employee,
+                                    UserHomeActions.NavigateToEditUser(
+                                        user = user,
                                         checked = checked
                                     )
                                 )
@@ -345,16 +356,13 @@ fun EmployeeContent(
                     }
                 }
             }
-
         }
-
-
     }
 }
 
 @Preview
 @Composable
-fun ShimmerEmployeeCard(modifier: Modifier = Modifier) {
+fun ShimmerUserCard(modifier: Modifier = Modifier) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = modifier,
@@ -452,12 +460,12 @@ fun ShimmerEmployeeCard(modifier: Modifier = Modifier) {
 
 
 @Composable
-fun EmployeeCard(
+fun UserCard(
     modifier: Modifier = Modifier,
-    employee: Result,
-    onClick: ((Result, Boolean) -> Unit)? = null,
-    onDeleteClick: (Result) -> Unit,
-    onEditClick: (Result, Boolean) -> Unit,
+    user: User,
+    onClick: ((User, Boolean) -> Unit)? = null,
+    onDeleteClick: (User) -> Unit,
+    onEditClick: (User, Boolean) -> Unit,
 ) {
     Box(
         modifier = modifier
@@ -468,7 +476,7 @@ fun EmployeeCard(
                 .clickable(
                     onClick = {
                         if (onClick != null) {
-                            onClick(employee, false)
+                            onClick(user, false)
                         }
                     }),
             colors = CardDefaults.cardColors(containerColor = CardBackground),
@@ -482,7 +490,7 @@ fun EmployeeCard(
                         modifier = Modifier
                             .height(60.dp)
                             .fillMaxWidth(),
-                        imageUrl = employee.picture.thumbnail,
+                        imageUrl = user.image,
                         contentScale = ContentScale.Crop,
                     )
 
@@ -495,7 +503,7 @@ fun EmployeeCard(
                     ) {
                         Text(
                             modifier = Modifier,
-                            text = "${employee.name.first} ${employee.name.last}",
+                            text = "${user.firstName} ${user.lastName}",
                             style = Typography.titleMedium,
                             maxLines = 1,
                             textAlign = TextAlign.Center
@@ -506,7 +514,7 @@ fun EmployeeCard(
 
                         Text(
                             modifier = Modifier,
-                            text = stringResource(R.string.street) + ": ${employee.location.street.streetName}, ${employee.location.street.number}",
+                            text = stringResource(R.string.gender) + ": ${user.gender}",
                             style = Typography.bodyMedium,
                             maxLines = 1,
                             textAlign = TextAlign.Center
@@ -516,7 +524,7 @@ fun EmployeeCard(
 
                         Text(
                             modifier = Modifier,
-                            text = stringResource(R.string.phone) + ": ${employee.phone}",
+                            text = stringResource(R.string.phone) + ": ${user.phone}",
                             style = Typography.labelSmall,
                             maxLines = 1,
                             textAlign = TextAlign.Center
@@ -535,7 +543,7 @@ fun EmployeeCard(
                         ) {
                             IconButton(
                                 onClick = {
-                                    onDeleteClick(employee)
+                                    onDeleteClick(user)
                                 },
                                 modifier = Modifier
                                     .size(28.dp),
@@ -554,7 +562,7 @@ fun EmployeeCard(
 
                             IconButton(
                                 onClick = {
-                                    onEditClick(employee, true)
+                                    onEditClick(user, true)
                                 },
                                 modifier = Modifier
                                     .size(28.dp),
@@ -578,7 +586,7 @@ fun EmployeeCard(
                         .clip(CircleShape)
                         .background(AvatarCircle)
                         .border(2.dp, Color.White, shape = CircleShape),
-                    imageUrl = employee.picture.large,
+                    imageUrl = user.image,
                     contentScale = ContentScale.Crop
                 )
             }
@@ -603,6 +611,7 @@ fun ShimmerSearchView() {
 fun SearchView(
     modifier: Modifier,
     searchQuery: String,
+    onClear: () -> Unit,
     onQueryChange: (String) -> Unit
 ) {
     //keyboard controller to show or hide keyboard
@@ -629,6 +638,18 @@ fun SearchView(
                 contentDescription = stringResource(R.string.search),
                 tint = LocalContentColor.current
             )
+        },
+        trailingIcon = {
+            IconButton(
+                onClick = onClear,
+                colors = IconButtonDefaults.iconButtonColors(contentColor = SearchIcon)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Clear,
+                    contentDescription = stringResource(R.string.clear),
+                    tint = LocalContentColor.current
+                )
+            }
         },
         textStyle = Typography.bodyMedium,
         maxLines = 1,
@@ -677,15 +698,14 @@ fun FloatingButtonComposable(
     onClick: () -> Unit
 ) {
     FloatingActionButton(
-        onClick = onClick
-        ,
+        onClick = onClick,
         shape = CircleShape,
         containerColor = Tryes,
         contentColor = Color.White,
     ) {
         Icon(
             imageVector = Icons.Default.Add,
-            contentDescription = stringResource(R.string.add_employee),
+            contentDescription = stringResource(R.string.add_user),
             tint = LocalContentColor.current
         )
     }

@@ -1,111 +1,104 @@
 package com.example.androiddevelopercodechallenge.data.dataSource.local
 
 import android.util.Log
-import androidx.paging.PagingSource
-import com.example.androiddevelopercodechallenge.data.model.Result
-import com.example.androiddevelopercodechallenge.data.roomDB.ResultDAO
+import com.example.androiddevelopercodechallenge.data.model.User
+import com.example.androiddevelopercodechallenge.data.roomDB.UserDaAO
+import com.example.androiddevelopercodechallenge.presentation.di.AppModule.IoDispatcher
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import javax.inject.Named
 
 class LocalDataSourceImpl @Inject constructor(
-    @Named("DispatchersIO")
+    @IoDispatcher
     private val coroutineDispatcher: CoroutineDispatcher,
-    private val resultDAO: ResultDAO,
+    private val userDaAO: UserDaAO,
 ) : LocalDataSource {
-    override suspend fun insertAllResults(results: List<Result>): Unit =
-        withContext(coroutineDispatcher) {
-            try {
-                resultDAO.insertAllResults(results = results)
-                Log.d("MyTag", "LocalDataSourceImpl: insertAllResults(): successfully completed")
-            } catch (e: Exception) {
-                if (e is CancellationException) {
-                    throw e
-                }
-                Log.e("MyTag", "LocalDataSourceImpl: insertAllResults(): failed ${e.message}")
-            }
-        }
-
-    override fun getPagingResults(): PagingSource<Int, Result> {
-        Log.d("MyTag", "LocalDataSourceImpl: getPagingResults(): called")
-        return resultDAO.getPagingResults()
-    }
-
-    override fun getAllResults(): Flow<List<Result>> {
+    override fun getAllUsers(): Flow<List<User>> {
         return try {
-            Log.d("MyTag", "LocalDataSourceImpl: getAllResults(): successfully completed")
-            resultDAO.getAllResults()
+            userDaAO.getAllUsers()
         } catch (e: Exception) {
             if (e is CancellationException) {
                 throw e
             }
-            Log.e("MyTag", "LocalDataSourceImpl: getAllResults(): failed ${e.message}")
+            Log.e("MyTag", "LocalDataSourceImpl: insertAllUsers(): failed ${e.message}")
             emptyFlow()
         }
     }
 
-    override suspend fun addResult(result: Result): Unit = withContext(coroutineDispatcher) {
-        try {
-            resultDAO.addResult(result = result)
-            Log.d("MyTag", "LocalDataSourceImpl: addResult(): successfully completed")
-        } catch (e: Exception) {
-            if (e is CancellationException) {
-                throw e
-            }
-            Log.e("MyTag", "LocalDataSourceImpl: addResult(): failed ${e.message}")
-        }
-    }
-
-    override suspend fun updateResult(result: Result): Unit = withContext(coroutineDispatcher) {
-        try {
-            resultDAO.updateResult(result = result)
-            Log.d("MyTag", "LocalDataSourceImpl: updateResult(): successfully completed")
-        } catch (e: Exception) {
-            if (e is CancellationException) {
-                throw e
-            }
-            Log.e("MyTag", "LocalDataSourceImpl: updateResult(): failed ${e.message}")
-        }
-    }
-
-    override suspend fun deleteResultsByEmail(email: String): Unit =
+    override suspend fun insertAllUsers(users: List<User>): Unit =
         withContext(coroutineDispatcher) {
             try {
-                resultDAO.deleteResultsByEmail(email = email)
+                userDaAO.insertAllUsers(users = users)
                 Log.d(
                     "MyTag",
-                    "LocalDataSourceImpl: deleteResultsById(): successfully completed: email:$email"
+                    "LocalDataSourceImpl: insertAllUsers(): successfully completed users: $users"
                 )
             } catch (e: Exception) {
                 if (e is CancellationException) {
                     throw e
                 }
-                Log.e("MyTag", "LocalDataSourceImpl: deleteResultsById(): failed ${e.message}")
+                Log.e("MyTag", "LocalDataSourceImpl: insertAllUsers(): failed ${e.message}")
             }
         }
 
-    override suspend fun deleteAll(): Unit = withContext(coroutineDispatcher) {
+    override suspend fun clearAndResetDatabase(): Unit = withContext(coroutineDispatcher) {
         try {
-            resultDAO.deleteAll()
-            Log.d("MyTag", "LocalDataSourceImpl: deleteAll(): successfully completed")
+            userDaAO.deleteAll()
+            //reset UID
+            userDaAO.resetUid()
+            Log.d("MyTag", "LocalDataSourceImpl: clearAndResetDatabase(): successfully completed")
         } catch (e: Exception) {
             if (e is CancellationException) {
                 throw e
             }
-            Log.e("MyTag", "LocalDataSourceImpl: deleteAll(): failed ${e.message}")
+            Log.e("MyTag", "LocalDataSourceImpl: clearAndResetDatabase(): failed ${e.message}")
         }
     }
 
-    override suspend fun getResultsCount(): Int = withContext(coroutineDispatcher) {
-        return@withContext try {
-            resultDAO.getResultsCount()
+    override suspend fun addUser(user: User): Unit = withContext(coroutineDispatcher) {
+        try {
+            userDaAO.addUser(user = user)
+            Log.d("MyTag", "LocalDataSourceImpl: addUser(): successfully completed")
         } catch (e: Exception) {
-            Log.e("MyTag","LocalDataSourceImpl: getResultsCount: failed :${e.message}")
-            0
+            if (e is CancellationException) {
+                throw e
+            }
+            Log.e("MyTag", "LocalDataSourceImpl: addUser(): failed ${e.message}")
         }
     }
+
+    override suspend fun updateUser(user: User): Unit = withContext(coroutineDispatcher) {
+        try {
+            userDaAO.updateUser(user = user)
+            Log.d("MyTag", "LocalDataSourceImpl: updateUser(): successfully completed")
+        } catch (e: Exception) {
+            if (e is CancellationException) {
+                throw e
+            }
+            Log.e("MyTag", "LocalDataSourceImpl: updateUser(): failed ${e.message}")
+        }
+    }
+
+    override suspend fun getUsersCount(): Int = withContext(coroutineDispatcher) {
+        return@withContext userDaAO.getUsersCount()
+    }
+
+    override suspend fun deleteUsersById(id: Int): Unit =
+        withContext(coroutineDispatcher) {
+            try {
+                userDaAO.deleteUsersById(id = id)
+                Log.d(
+                    "MyTag",
+                    "LocalDataSourceImpl: deleteUsersById(): successfully completed: id:$id"
+                )
+            } catch (e: Exception) {
+                if (e is CancellationException) {
+                    throw e
+                }
+                Log.e("MyTag", "LocalDataSourceImpl: deleteUsersById(): failed ${e.message}")
+            }
+        }
 }

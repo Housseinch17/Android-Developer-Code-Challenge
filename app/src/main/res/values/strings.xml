@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Android Developer – Code Challenge</string>
-    <string name="add_employee">Add Employee</string>
+    <string name="add_user">Add User</string>
     <string name="save">Save</string>
-    <string name="search_employee">Search for Employee</string>
+    <string name="search_user">Search for User</string>
     <string name="search">Search</string>
     <string name="clear">Clear</string>
     <string name="street">Street</string>
@@ -10,7 +10,7 @@
     <string name="id">ID</string>
     <string name="delete">Delete</string>
     <string name="dismiss">Dismiss</string>
-    <string name="delete_employee">Delete Employee</string>
+    <string name="delete_user">Delete User</string>
     <string name="are_you_sure_want_to_delete">Are you sure you want to delete</string>
     <string name="upload_profile">Upload Profile</string>
     <string name="upload_new_profile">Upload New Profile</string>
@@ -32,8 +32,7 @@
     <string name="required_fields">Required fields</string>
     <string name="please_use_valid_email">Please use valid email</string>
     <string name="successfully_updated">Successfully updated</string>
-    <string name="employee_added_message">%1$s %2$s successfully added!</string>
-    <string name="employee_has_been_deleted">%1$s %2$s has been deleted!</string>
-
+    <string name="user_added_message">%1$s %2$s successfully added!</string>
+    <string name="user_has_been_deleted">%1$s %2$s has been deleted!</string>
 
 </resources>

@@ -2,12 +2,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Theme.AndroidDeveloperCodeChallenge" parent="android:Theme.Material.Light.NoActionBar" >
-        <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">@mipmap/employee_launcher_icon_round</item>
+        <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">@mipmap/user_launcher_icon_round</item>
     <item name="android:windowSplashScreenBackground" tools:targetApi="31">@color/splashScreenBackground</item>
     </style>
 
     <style name="Theme.Activity" parent="Theme.AndroidDeveloperCodeChallenge">
-        <item name="android:windowBackground">@drawable/employee</item>
+        <item name="android:windowBackground">@drawable/user</item>
         //false means it will not fit the system window like status bar for example
         <item name="android:fitsSystemWindows">false</item>
     </style>

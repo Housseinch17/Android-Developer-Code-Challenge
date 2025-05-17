@@ -60,10 +60,10 @@ import coil.request.ImageRequest
 import com.example.androiddevelopercodechallenge.R
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditActions
 import com.example.androiddevelopercodechallenge.data.util.AddOrEditUiState
-import com.example.androiddevelopercodechallenge.presentation.screen.addEmployeeScreen.AddTextFieldForm
-import com.example.androiddevelopercodechallenge.presentation.screen.addEmployeeScreen.GenderDropDown
-import com.example.androiddevelopercodechallenge.presentation.screen.addEmployeeScreen.PhoneInputWithCountryCode
-import com.example.androiddevelopercodechallenge.presentation.screen.addEmployeeScreen.TextLabel
+import com.example.androiddevelopercodechallenge.presentation.screen.addUserScreen.AddTextFieldForm
+import com.example.androiddevelopercodechallenge.presentation.screen.addUserScreen.GenderDropDown
+import com.example.androiddevelopercodechallenge.presentation.screen.addUserScreen.PhoneInputWithCountryCode
+import com.example.androiddevelopercodechallenge.presentation.screen.addUserScreen.TextLabel
 import com.example.androiddevelopercodechallenge.presentation.theme.Label
 import com.example.androiddevelopercodechallenge.presentation.theme.OffWhite
 import com.example.androiddevelopercodechallenge.presentation.theme.Roboto_Bold
@@ -74,7 +74,7 @@ import com.example.androiddevelopercodechallenge.presentation.theme.Typography
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AddOrEditEmployeeScreen(
+fun AddOrEditUserScreen(
     modifier: Modifier,
     state: AddOrEditUiState,
     onActions: (AddOrEditActions) -> Unit,
@@ -95,7 +95,7 @@ fun AddOrEditEmployeeScreen(
                     modifier = Modifier
                         .fillMaxWidth(),
                     onClick = {
-                        onActions(AddOrEditActions.AddOrSaveEmployee)
+                        onActions(AddOrEditActions.AddOrSaveUser)
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Tryes,
@@ -107,7 +107,7 @@ fun AddOrEditEmployeeScreen(
                 ) {
                     Text(
                         modifier = Modifier.padding(vertical = 6.dp),
-                        text = if (state is AddOrEditUiState.AddEmployeeUiState) stringResource(R.string.add_employee)
+                        text = if (state is AddOrEditUiState.AddUserUiState) stringResource(R.string.add_user)
                         else {
                             stringResource(R.string.save)
                         },
@@ -155,7 +155,7 @@ fun AddOrEditEmployeeScreen(
 
                 AddTextFieldForm(
                     textInput = R.string.first_name,
-                    inputValue = state.employee.name.first,
+                    inputValue = state.user.firstName,
                     onInputChange = { newFirstName ->
                         onActions(AddOrEditActions.UpdateFirstName(firstName = newFirstName))
                     },
@@ -166,7 +166,7 @@ fun AddOrEditEmployeeScreen(
 
                 AddTextFieldForm(
                     textInput = R.string.last_name,
-                    inputValue = state.employee.name.last,
+                    inputValue = state.user.lastName,
                     onInputChange = { newLastName ->
                         onActions(AddOrEditActions.UpdateLastName(lastName = newLastName))
                     },
@@ -177,7 +177,7 @@ fun AddOrEditEmployeeScreen(
 
                 AddTextFieldForm(
                     textInput = R.string.email,
-                    inputValue = state.employee.email,
+                    inputValue = state.user.email,
                     onInputChange = { newEmail ->
                         onActions(AddOrEditActions.UpdateEmail(email = newEmail))
                     },
@@ -204,7 +204,7 @@ fun AddOrEditEmployeeScreen(
                     onCountrySelect = { selectedCountry ->
                         onActions(AddOrEditActions.UpdateSelectedCountry(country = selectedCountry))
                     },
-                    phoneNUmberValue = state.employee.phone,
+                    phoneNUmberValue = state.user.phone,
                     onPhoneNumberChange = { newPhoneNumber ->
                         onActions(AddOrEditActions.UpdatePhoneNumber(phoneNumber = newPhoneNumber))
                     },
@@ -218,7 +218,7 @@ fun AddOrEditEmployeeScreen(
                 GenderDropDown(
                     modifier = Modifier,
                     isGenderExpanded = state.isGenderExpanded,
-                    selectedGender = state.employee.gender,
+                    selectedGender = state.user.gender,
                     onExpand = {
                         onActions(AddOrEditActions.OnGenderExpand)
                     },

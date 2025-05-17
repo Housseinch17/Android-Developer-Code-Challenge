@@ -1,8 +1,7 @@
 package com.example.androiddevelopercodechallenge.data.dataSource
 
-import androidx.paging.PagingSource
 import com.example.androiddevelopercodechallenge.data.dataSource.local.LocalDataSource
-import com.example.androiddevelopercodechallenge.data.model.Result
+import com.example.androiddevelopercodechallenge.data.model.User
 import com.example.androiddevelopercodechallenge.domain.repository.LocalRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -10,35 +9,31 @@ import javax.inject.Inject
 class LocalRepositoryImpl @Inject constructor(
     private val localDataSource: LocalDataSource,
 ): LocalRepository {
-    override suspend fun insertAllResults(results: List<Result>) {
-        localDataSource.insertAllResults(results = results)
+    override fun getAllUsers(): Flow<List<User>> {
+        return localDataSource.getAllUsers()
     }
 
-    override fun getPagingResults(): PagingSource<Int, Result> {
-       return localDataSource.getPagingResults()
+    override suspend fun insertAllUsers(users: List<User>) {
+        localDataSource.insertAllUsers(users = users)
     }
 
-    override fun getAllResults(): Flow<List<Result>> {
-        return localDataSource.getAllResults()
+    override suspend fun clearAndResetDatabase() {
+        localDataSource.clearAndResetDatabase()
     }
 
-    override suspend fun addResult(result: Result) {
-        localDataSource.addResult(result = result)
+    override suspend fun addUser(user: User) {
+        localDataSource.addUser(user = user)
     }
 
-    override suspend fun updateResult(result: Result) {
-        localDataSource.updateResult(result = result)
+    override suspend fun updateUser(user: User) {
+        localDataSource.updateUser(user = user)
     }
 
-    override suspend fun deleteResultsByEmail(email: String) {
-        localDataSource.deleteResultsByEmail(email = email)
+    override suspend fun deleteUsersById(id: Int) {
+        localDataSource.deleteUsersById(id = id)
     }
 
-    override suspend fun deleteAll() {
-        localDataSource.deleteAll()
-    }
-
-    override suspend fun getResultsCount(): Int {
-        return localDataSource.getResultsCount()
+    override suspend fun getUsersCount(): Int {
+        return localDataSource.getUsersCount()
     }
 }
