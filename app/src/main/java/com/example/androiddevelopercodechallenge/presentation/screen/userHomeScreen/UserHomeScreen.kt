@@ -68,6 +68,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.example.androiddevelopercodechallenge.R
 import com.example.androiddevelopercodechallenge.data.model.User
 import com.example.androiddevelopercodechallenge.presentation.theme.AvatarCircle
@@ -240,7 +241,10 @@ fun UserContent(
                     contentPadding = PaddingValues(bottom = 20.dp)
                 ) {
                     items(
-                        filteredUserPagingFlow.itemCount,
+                        count = filteredUserPagingFlow.itemCount,
+                        key = filteredUserPagingFlow.itemKey{
+                            it.uid
+                        }
                     ) { index ->
                         val user = filteredUserPagingFlow[index]
                         user?.let {
