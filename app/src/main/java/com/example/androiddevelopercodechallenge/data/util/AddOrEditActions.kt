@@ -4,15 +4,15 @@ import com.example.androiddevelopercodechallenge.data.model.User
 
 sealed interface AddOrEditActions {
 
-    data class UpdateFirstName(val firstName: String) : AddUserActions
-    data class UpdateLastName(val lastName: String) : AddUserActions
-    data class UpdateEmail(val email: String) : AddUserActions
-    data class UpdatePhoneNumber(val phoneNumber: String) : AddUserActions
-    data object OnCountryExpand : AddUserActions
-    data class UpdateSelectedCountry(val country: Country) : AddUserActions
-    data object OnGenderExpand : AddUserActions
-    data class UpdateSelectedGender(val gender: String) : AddUserActions
-    data object AddOrSaveUser : AddUserActions
+    data class UpdateFirstName(val firstName: String) : AddOrEditActions
+    data class UpdateLastName(val lastName: String) : AddOrEditActions
+    data class UpdateEmail(val email: String) : AddOrEditActions
+    data class UpdatePhoneNumber(val phoneNumber: String) : AddOrEditActions
+    data object OnCountryExpand : AddOrEditActions
+    data class UpdateSelectedCountry(val country: Country) : AddOrEditActions
+    data object OnGenderExpand : AddOrEditActions
+    data class UpdateSelectedGender(val gender: String) : AddOrEditActions
+    data object AddOrSaveUser : AddOrEditActions
 
     sealed interface AddUserActions: AddOrEditActions
 
