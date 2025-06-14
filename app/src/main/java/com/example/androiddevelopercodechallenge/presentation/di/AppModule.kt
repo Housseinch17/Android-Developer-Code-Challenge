@@ -13,12 +13,11 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    @Qualifier
     @Retention(AnnotationRetention.BINARY)
+    @Qualifier
     annotation class IoDispatcher
 
     @Provides
-    @Singleton
     @IoDispatcher
     fun provideDispatchersIO(): CoroutineDispatcher = Dispatchers.IO
 
